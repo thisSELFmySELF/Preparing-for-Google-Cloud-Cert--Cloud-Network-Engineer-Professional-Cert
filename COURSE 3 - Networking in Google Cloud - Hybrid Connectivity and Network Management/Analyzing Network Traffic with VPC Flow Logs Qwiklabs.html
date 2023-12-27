@@ -1,0 +1,984 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Analyzing Network Traffic with VPC Flow Logs | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-b1b28b59480cca2ab0c23485f64ba2ec8893bdc9.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-484f429ecd41bc910509948cecaf71d98c510234.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-644b7af44e10b6334d7881042d33e7eac427c3b8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-011e84c80a51010837f8d7868d0972aebf80b2b1.js"></script>
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="Grp6fe/D2O5Kg9AAqdVBMPcKfYnmNMAJPr/oyT5bEb5jylUh5OnwCXEGL6yPpQjVMHFV73IYRVmX1dyaS3EcFw==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:0,&quot;variant&quot;:&quot;original&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;barker&quot;,&quot;community_forum&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;used_in&quot;,&quot;content_provider_admin&quot;,&quot;program_announcements&quot;,&quot;organization_announcements&quot;,&quot;organization_learning_plans&quot;,&quot;course_upgrade&quot;,&quot;show_annual_purchase_now&quot;,&quot;oauth_risc_shutoff&quot;,&quot;program_learning_assignment&quot;,&quot;teams&quot;,&quot;peer_assignment&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;canonical_domain_redirect&quot;,&quot;alexandria_show_bundle_errors&quot;,&quot;search_updates&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab, you configure a network to record traffic to and from an apache web server using VPC Flow Logs. You will then export the logs to BigQuery to analyze them.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Analyzing Network Traffic with VPC Flow Logs | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab, you configure a network to record traffic to and from an apache web server using VPC Flow Logs. You will then export the logs to BigQuery to analyze them.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/32797943?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/32797943?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-2bce1f34bff374bb8e1de389ce3467c39fc4868b.css" media="all" />
+<link rel="stylesheet" href="https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.css" media="screen" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="1b41f623658e6456" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-title-medium'>Analyzing Network Traffic with VPC Flow Logs</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/32797943?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/32797943?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/32797943?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/32797943?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/32797943?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/32797943?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/32797943?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/32797943?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/32797943?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/32797943?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/32797943?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/32797943?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/32797943?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/32797943?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/32797943?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/32797943?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/32797943?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/32797943?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/32797943?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-title-medium'>Justin Ho</h4>
+<p class='ql-body-medium text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-medium text--light'>
+</p>
+<a class="text--green ql-title-small" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-label-medium text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-label-medium text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-label-medium text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+—/15
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Configure a custom network with VPC Flow Logs
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Configure a custom network with VPC Flow Logs' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+</span>
+/ 5
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create an Apache web server
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create an Apache web server' step_no='2'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+</span>
+/ 5
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Export the network traffic to BigQuery to further analyze the logs.
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Export the network traffic to BigQuery to further analyze the logs.' step_no='3'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-3'>
+</span>
+/ 5
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Analyzing Network Traffic with VPC Flow Logs&quot;,&quot;lab_name&quot;:&quot;Analyzing Network Traffic with VPC Flow Logs&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='32797943' data-lab-billing-limit='0.0' data-lab-duration='4800' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:false}' labDetails='[]' labTimer='{&quot;ticking&quot;:false,&quot;secondsRemaining&quot;:4800}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Analyzing Network Traffic with VPC Flow Logs
+</h1>
+<div class='lab-preamble__details ql-title-medium'>
+<span>1 hour 20 minutes</span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/32797943/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.3883'></div>
+
+</a></div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">Overview</h2>
+<p>In this lab, you will configure a network to record traffic to and from an Apache web server using VPC Flow Logs. You will then export the logs to BigQuery to analyze them.</p>
+<h3>Objectives</h3>
+<p>In this lab, you will learn how to perform the following tasks:</p>
+<ul>
+<li>Configure a custom network with VPC flow logs.</li>
+<li>Create an Apache web server.</li>
+<li>Verify that network traffic is logged.</li>
+<li>Export the network traffic to BigQuery to further analyze the logs.</li>
+<li>Setup VPC flow log aggregation.</li>
+</ul>
+<h2 id="step2">Setup and requirements</h2>
+<p>For each lab, you get a new Google Cloud project and set of resources for a fixed time at no cost.</p>
+<ol>
+<li>
+<p>Sign in to Qwiklabs using an <strong>incognito window</strong>.</p>
+</li>
+<li>
+<p>Note the lab's access time (for example, <code>1:15:00</code>), and make sure you can finish within that time.<br>
+There is no pause feature. You can restart if needed, but you have to start at the beginning.</p>
+</li>
+<li>
+<p>When ready, click <strong>Start lab</strong>.</p>
+</li>
+<li>
+<p>Note your lab credentials (<strong>Username</strong> and <strong>Password</strong>). You will use them to sign in to the Google Cloud Console.</p>
+</li>
+<li>
+<p>Click <strong>Open Google Console</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Use another account</strong> and copy/paste credentials for <strong>this</strong> lab into the prompts.<br>
+If you use other credentials, you'll receive errors or <strong>incur charges</strong>.</p>
+</li>
+<li>
+<p>Accept the terms and skip the recovery resource page.</p>
+</li>
+</ol>
+<aside class="warning"><p><strong>Note:</strong> Do not click <strong>End Lab</strong> unless you have finished the lab or want to restart it. This clears your work and removes the project.
+  </p>
+</aside>
+
+<h2 id="step3">Task 1. Configure a custom network with VPC flow logs</h2>
+<h3>Create the custom network</h3>
+<p>By default, VPC Flow Logs are disabled for a network. Therefore, you will create a new custom-mode network and enable VPC flow logs.</p>
+<ol>
+<li>
+<p>In the Cloud Console, in the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), select <strong>VPC network &gt; VPC networks</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Create VPC Network</strong>.</p>
+</li>
+<li>
+<p>Specify the following and leave the remaining settings as their defaults:</p>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td>Name</td>
+<td>vpc-net</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Enter an optional description</td>
+</tr>
+
+</table>
+</li>
+<li>
+<p>For <strong>Subnet creation mode</strong>, click <strong>Custom</strong>.</p>
+</li>
+<li>
+<p>Specify the following and leave the remaining settings as their defaults:</p>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td>Name</td>
+<td>vpc-subnet</td>
+</tr>
+<tr>
+<td>Region</td>
+<td>us-central1</td>
+</tr>
+<tr>
+<td>IP address range</td>
+<td>10.1.3.0/24</td>
+</tr>
+<tr>
+<td>Flow Logs</td>
+<td>On</td>
+</tr>
+
+</table>
+</li>
+</ol>
+<ql-infobox><strong>Note: </strong>Turning on VPC flow logs doesn't affect performance, but some systems generate a large number of logs, which can increase costs. If you click on <strong>Configure logs</strong> you'll notice that you can modify the aggregation interval and sample rate. This allows you to trade off longer interval updates for lower data volume generation which lowers logging costs. For more information on this, refer to the <a href="https://cloud.google.com/vpc/docs/using-flow-logs#log-sampling" target="_blank">log sampling and processing</a> documentation.</ql-infobox>
+<ol start="6">
+<li>Click <strong>Done</strong>.</li>
+<li>Click <strong>Create</strong>.</li>
+</ol>
+<p>Wait for the network to be created before continuing.</p>
+<h3>Create the firewall rule</h3>
+<p>In order to serve HTTP and SSH traffic on the network, you need to create a firewall rule.</p>
+<ol>
+<li>
+<p>In the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), select <strong>VPC network &gt; Firewall</strong>.</p>
+</li>
+<li>
+<p>Click <strong>CREATE FIREWALL RULE</strong>.</p>
+</li>
+<li>
+<p>Specify the following and leave the remaining settings as their defaults:</p>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td>Name</td>
+<td>allow-http-ssh</td>
+</tr>
+<tr>
+<td>Network</td>
+<td>vpc-net</td>
+</tr>
+<tr>
+<td>Targets</td>
+<td>Specified target tags</td>
+</tr>
+<tr>
+<td>Target tags</td>
+<td>http-server</td>
+</tr>
+<tr>
+<td>Source filter</td>
+<td>IPv4 Ranges</td>
+</tr>
+<tr>
+<td>Source IPv4 ranges</td>
+<td>0.0.0.0/0</td>
+</tr>
+<tr>
+<td>Protocols and ports</td>
+<td>Specified protocols and ports, and then <em>check</em> tcp, <em>type:</em> 80, 22</td>
+</tr>
+
+</table>
+</li>
+</ol>
+<ql-infobox><strong>Note: </strong>Make sure to include the <strong>/0</strong> in the <strong>Source IPv4 ranges</strong> to specify all networks.</ql-infobox>
+<ol start="4">
+<li>Click <strong>Create</strong>.</li>
+</ol>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="1">
+Configure a custom network with VPC Flow Logs
+</ql-activity-tracking></p>
+<h2 id="step4">Task 2. Create an Apache web server</h2>
+<h3>Create the web server</h3>
+<ol>
+<li>
+<p>In the <strong>Navigation menu</strong>, select <strong>Compute Engine &gt; VM instances</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Create instance</strong>.</p>
+</li>
+<li>
+<p>Specify the following and leave the remaining settings as their defaults:</p>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td>Name</td>
+<td>web-server</td>
+</tr>
+<tr>
+<td>Region</td>
+<td>us-central1</td>
+</tr>
+<tr>
+<td>Zone</td>
+<td>us-central1-c</td>
+</tr>
+<tr>
+<td>Series</td>
+<td>E2</td>
+</tr>
+<tr>
+<td>Machine type</td>
+<td>e2-micro</td>
+</tr>
+
+</table>
+</li>
+<li>
+<p>Click <strong>Advanced Options</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Networking</strong>.</p>
+</li>
+<li>
+<p>For <strong>Network tags</strong>, type <code>http-server</code>.</p>
+</li>
+<li>
+<p>For <strong>Network interfaces</strong>, click <strong>default</strong>.</p>
+</li>
+<li>
+<p>Specify the following and leave the remaining settings as their defaults:</p>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td>Network</td>
+<td>vpc-net</td>
+</tr>
+<tr>
+<td>Subnetwork</td>
+<td>vpc-subnet (10.1.3.0/24)</td>
+</tr>
+
+</table>
+</li>
+<li>
+<p>Click <strong>Done</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Create</strong>.</p>
+</li>
+</ol>
+<h3>Install Apache</h3>
+<p>Configure the VM instance that you created as an Apache web server and overwrite the default web page.</p>
+<ol>
+<li>
+<p>For <strong>web-server</strong>, click <strong>SSH</strong> to launch a terminal and connect.</p>
+</li>
+<li>
+<p>In the <strong>web-server</strong> SSH terminal, update the package index:</p>
+<ql-code-block language="plaintext">
+sudo apt-get update
+</ql-code-block>
+</li>
+<li>
+<p>Install the apache2 package:</p>
+<ql-code-block language="plaintext">
+sudo apt-get install apache2 -y
+</ql-code-block>
+</li>
+<li>
+<p>To create a new default web page by overwriting the default, run  the following:</p>
+<ql-code-block language="plaintext">
+echo '&lt;!doctype html&gt;&lt;html&gt;&lt;body&gt;&lt;h1&gt;Hello World!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;' | sudo tee /var/www/html/index.html
+</ql-code-block>
+</li>
+<li>
+<p>Exit the SSH terminal:</p>
+<ql-code-block language="plaintext">
+exit
+</ql-code-block>
+</li>
+</ol>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="2">
+Create an Apache web server
+</ql-activity-tracking></p>
+<h2 id="step5">Task 3. Verify that network traffic is logged</h2>
+<h3>Generate network traffic</h3>
+<ol>
+<li>Return to the <strong>VM instances</strong> page in the Cloud Console.</li>
+<li>For <strong>web-server</strong>, click on the <strong>External IP</strong> to access the server.</li>
+</ol>
+<ql-infobox><strong>Note: </strong>You should see the <strong>Hello World!</strong> welcome page that you configured. Alternatively, you can access the server in a new tab by navigating to http://<i>Enter the external IP Address</i>.</ql-infobox>
+<h3>Find your IP address</h3>
+<p>Find the IP address of the computer you are using. One easy way to do this is to go to a website that provides this address.</p>
+<ol>
+<li>Open a browser in a new tab.</li>
+<li>Go to <a href="https://www.google.com" target="_blank">Google.com</a> and search for <code>what's my IP</code>. It will either directly reply with your IP or give you a list of sites that perform this service.</li>
+<li>Ensure that the IP address only contains numerals (IPv4) and is not represented in hexadecimal (IPv6).</li>
+<li>Copy your IP address. It will be referred to as <em>YOUR_IP_ADDRESS</em>.</li>
+</ol>
+<h3>Access the VPC flow logs</h3>
+<ol>
+<li>In the Cloud Console, go to <strong>Navigation menu &gt; Logging &gt; Logs Explorer</strong>.</li>
+<li>In the <strong>Log fields</strong> panel, under <strong>RESOURCE TYPE</strong>, click <strong>Subnetwork</strong>. In the Query results pane, entries from the subnetwork logs appear.</li>
+<li>In the <strong>Log fields</strong> panel, under <strong>LOG NAME</strong>, click <strong>compute.googleapis.com/vpc_flows</strong>. In the Query results panel, entries from the VPC flow logs appear. If you do not see <strong>compute.googleapis.com/vpc_flows</strong>, wait a few minutes for this log type to show up.</li>
+<li>Enable the <strong>Show query</strong> button.</li>
+<li>In the Query builder box, at the end of line 2, press <strong>Enter</strong> to create a new line.</li>
+<li>On line 3, enter <em>YOUR_IP_ADDRESS</em> and click <strong>Run Query</strong>.</li>
+</ol>
+<ql-warningbox><strong>Note: </strong>If you do not see the <strong>vpc_flows</strong> filter option or if there are no logs, you might have to wait a few minutes and refresh. If after a couple of minutes you still don't see the <strong>vpc_flows</strong> filter option, click on the <strong>External IP</strong> of the <strong>web-server</strong> a couple of times to generate more traffic and check back on the <strong>vpc_flows</strong> filter option.</ql-warningbox>
+<ol start="7">
+<li>Expand one of the log entries.</li>
+<li>Within the entry, expand the <strong>jsonPayload</strong> and then expand the <strong>connection</strong>.</li>
+</ol>
+<p><ql-multiple-select-probe answerindices="[0, 1, 2, 3, 4]" optiontitles='[
+"Source IP address",
+"Source port",
+"Destination IP address",
+"Destination port",
+"The IANA protocol number"
+]' stem="Which fields does the connection contain?">
+</ql-multiple-select-probe></p>
+<p>You can explore other fields within the log entry before continuing to the next task.</p>
+<h2 id="step6">Task 4. Export the network traffic to BigQuery to further analyze the logs</h2>
+<h3>Create an export sink</h3>
+<ol>
+<li>In the <strong>Navigation menu</strong>, select <strong>Logging &gt; Logs Explorer</strong>. This will clear the other information that you entered in the previous task.</li>
+<li>Under the <strong>RESOURCE TYPE</strong>, click <strong>Subnetwork</strong>. In the Query results pane, entries for all available subnetworks appear.</li>
+<li>Under the <strong>LOG NAME</strong> filter, click <strong>compute.googleapis.com/vpc_flows</strong>. In the Query results pane, only the VPC flow log entries are shown.</li>
+<li>Select <strong>More actions &gt; Create Sink</strong>.</li>
+<li>For the  <strong>Sink name</strong>, type <code>bq_vpcflows</code>, and click <strong>NEXT</strong>.</li>
+<li>In the <strong>Select sink service</strong> drop-down list, select <strong>BigQuery dataset</strong>.</li>
+<li>In the <strong>Select BigQuery dataset</strong> drop-down list, select <strong>Create new BigQuery dataset</strong>.</li>
+<li>For <strong>Dataset ID</strong>, enter <code>bq_vpcflows</code>, and click <strong>CREATE DATASET</strong>.</li>
+<li>Click <strong>NEXT</strong> twice.</li>
+<li>Click <strong>CREATE SINK</strong>.</li>
+</ol>
+<h3>Generate log traffic for BigQuery</h3>
+<p>Now that the network traffic logs are being exported to BigQuery, you need to generate more traffic by accessing the web-server several times. Using Cloud Shell, you can <code>curl</code> the IP address of the web-server several times.</p>
+<ol>
+<li>In the <strong>Navigation menu</strong>, select <strong>Compute Engine &gt; VM instances</strong>.</li>
+<li>Note the <strong>External IP</strong> address for the <strong>web-server</strong> instance. It will be referred to as <em>EXTERNAL_IP</em>.</li>
+<li>Click <strong>Activate Cloud Shell</strong> (<img alt="Activate Cloud Shell icon" src="https://cdn.qwiklabs.com/ep8HmqYGdD%2FkUncAAYpV47OYoHwC8%2Bg0WK%2F8sidHquE%3D">).</li>
+<li>If prompted, click <strong>Continue</strong>.</li>
+<li>Store the <em>EXTERNAL_IP</em> in an environment variable in Cloud Shell:</li>
+</ol>
+<ql-code-block language="plaintext">
+export MY_SERVER=&lt;Enter the EXTERNAL_IP here&gt;
+</ql-code-block>
+<ol start="6">
+<li>Access the web-server 50 times from Cloud Shell:</li>
+</ol>
+<ql-code-block language="plaintext">
+for ((i=1;i&lt;=50;i++)); do curl $MY_SERVER; done
+</ql-code-block>
+<h3>Visualize the VPC flow logs in BigQuery</h3>
+<ol>
+<li>In the Cloud Console, in the <strong>Navigation menu</strong>, click <strong>BigQuery</strong>.</li>
+<li>If prompted, click <strong>Done</strong>.</li>
+<li>In the left pane, expand the <strong>bq_vpcflows</strong> dataset to reveal the table. You might have to first expand the <strong>Project ID</strong> to reveal the dataset.</li>
+<li>Click on the name of the table. It should start with <strong>compute_googleapis</strong>.</li>
+<li>Click on the <strong>Details</strong> tab.</li>
+<li>Copy the <em>Table ID</em> value under Table info.</li>
+</ol>
+<ql-warningbox><strong>Note: </strong>If you do not see the <strong>bq_vpcflows</strong> dataset or if it does not expand, wait and refresh the page.</ql-warningbox>
+<ol start="7">
+<li>
+<p>Click the + icon to open a new BidQuery Editor tab.</p>
+</li>
+<li>
+<p>Add the following to the BigQuery <strong>Editor</strong> and replace <strong>your_table_id</strong> with <em>TABLE_ID</em> while retaining the accents (`) on both sides:</p>
+</li>
+</ol>
+<ql-code-block language="sql">
+#standardSQL
+SELECT
+jsonPayload.src_vpc.vpc_name,
+SUM(CAST(jsonPayload.bytes_sent AS INT64)) AS bytes,
+jsonPayload.src_vpc.subnetwork_name,
+jsonPayload.connection.src_ip,
+jsonPayload.connection.src_port,
+jsonPayload.connection.dest_ip,
+jsonPayload.connection.dest_port,
+jsonPayload.connection.protocol
+FROM
+`your_table_id`
+GROUP BY
+jsonPayload.src_vpc.vpc_name,
+jsonPayload.src_vpc.subnetwork_name,
+jsonPayload.connection.src_ip,
+jsonPayload.connection.src_port,
+jsonPayload.connection.dest_ip,
+jsonPayload.connection.dest_port,
+jsonPayload.connection.protocol
+ORDER BY
+bytes DESC
+LIMIT
+15
+</ql-code-block>
+<ol start="9">
+<li>Click <strong>Run</strong>.</li>
+</ol>
+<ql-warningbox><strong>Note: </strong>If you get an error, ensure that you did not remove the <strong>#standardSQL</strong> part of the query. If it still fails, ensure that the TABLE_ID did not include the Project ID.</ql-warningbox>
+<p><ql-multiple-select-probe answerindices="[0, 1, 2, 3, 4, 5]" optiontitles='[
+"Sum of bytes sent",
+"Source IP address and port",
+"Destination IP address and port",
+"Protocol",
+"VPC name",
+"Subnet name"
+]' shuffle="" stem="Which columns does the results table contain?">
+</ql-multiple-select-probe></p>
+<h3>Analyze the VPC flow logs in BigQuery</h3>
+<p>The previous query gave you the same information that you saw in the Cloud Console. Now, you will change the query to identify the top IP addresses that have exchanged traffic with your <strong>web-server</strong>.</p>
+<ol>
+<li>Create a new query in the BigQuery <strong>Editor</strong> with the following and replace <strong>your_table_id</strong> with <em>TABLE_ID</em> while retaining the accents (`) on both sides:</li>
+</ol>
+<ql-code-block language="sql">
+#standardSQL
+SELECT
+jsonPayload.connection.src_ip,
+jsonPayload.connection.dest_ip,
+SUM(CAST(jsonPayload.bytes_sent AS INT64)) AS bytes,
+jsonPayload.connection.dest_port,
+jsonPayload.connection.protocol
+FROM
+`your_table_id`
+WHERE jsonPayload.reporter = 'DEST'
+GROUP BY
+jsonPayload.connection.src_ip,
+jsonPayload.connection.dest_ip,
+jsonPayload.connection.dest_port,
+jsonPayload.connection.protocol
+ORDER BY
+bytes DESC
+LIMIT
+15
+</ql-code-block>
+<ol start="2">
+<li>Click <strong>Run</strong>.</li>
+</ol>
+<ql-infobox><strong>Note: </strong>The results table now has a row for each source IP and is sorted by the highest amount of bytes sent to the <strong>web-server</strong>. The top result should reflect your Cloud Shell IP address.</ql-infobox>
+<ql-warningbox><strong>Note: </strong>Unless you accessed the <strong>web-server</strong> after creating the export sink, you will not see your machine's IP address in the table.</ql-warningbox>
+<p>You can generate more traffic to the <strong>web-server</strong> from multiple sources and query the table again to determine the bytes sent to the server.</p>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="3">
+Export the network traffic to BigQuery to further analyze the logs
+</ql-activity-tracking></p>
+<h2 id="step7">Task 5. Add VPC flow log aggregation</h2>
+<p>In this task, you will now explore a new release of <a href="https://cloud.google.com/vpc/docs/using-flow-logs#log-sampling" target="_blank">VPC flow log volume reduction</a>. Not every packet is captured into its own log record. However, even with sampling, log record captures can be quite large.</p>
+<p>You can balance your traffic visibility and storage cost needs by adjusting specific aspects of logs collection, which you will explore in this section.</p>
+<h3>Setting up aggregation</h3>
+<ol>
+<li>
+<p>In the Console, navigate to the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">) and select <strong>VPC network &gt; VPC networks</strong>.</p>
+</li>
+<li>
+<p>Click <strong>vpc-net</strong> and then click <strong>Edit</strong>.</p>
+</li>
+<li>
+<p>In the Subnets tab, click <strong>vpc-subnet</strong>:</p>
+</li>
+</ol>
+<p><img alt="VPC subnets in Subnets tab" src="https://cdn.qwiklabs.com/loPbGvCESaB2oiby%2FYRCmr8qwwOlSoEo2G4bQwjPeSk%3D"></p>
+<ol start="4">
+<li>Click <strong>Edit &gt; Configure logs</strong> to expose the following fields:</li>
+</ol>
+<p><img alt="Flow log settings additional fields" src="https://cdn.qwiklabs.com/6nrpXe5u7V6q3dZayKaIbaJT939PCrnt2l1whV4BfRY%3D"></p>
+<p>The purpose of each field is explained below.</p>
+<ul>
+<li>
+<p><strong>Aggregation time interval:</strong> Sampled packets for a time interval are aggregated into a single log entry. This time interval can be 5 sec (default), 30 sec, 1 min, 5 min, 10 min, or 15 min.</p>
+</li>
+<li>
+<p><strong>Metadata annotations:</strong> By default, flow log entries are annotated with metadata information, such as the names of the source and destination VMs or the geographic region of external sources and destinations. This metadata annotation can be turned off to save storage space.</p>
+</li>
+<li>
+<p><strong>Log entry sampling:</strong> Before being written to the database, the number of logs can be sampled to reduce their number. By default, the log entry volume is scaled by 0.50 (50%), which means that half of entries are kept. You can set this from 1.0 (100%, all log entries are kept) to 0.0 (0%, no logs are kept).</p>
+</li>
+</ul>
+<ol start="5">
+<li>
+<p>Set the <strong>Aggregation Interval</strong> to <strong>30 seconds</strong>.</p>
+</li>
+<li>
+<p>Set the <strong>Sample rate</strong> to <strong>25%</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Save</strong>. You should see the following message:</p>
+</li>
+</ol>
+<p><img alt="Estimated logs generated per day notification" src="https://cdn.qwiklabs.com/X1bEDNMrLRomcnHD0AAzR7Bne%2FiMjDDjwyptAVQY6hY%3D"></p>
+<p>Setting the aggregation level to 30 seconds can reduce your flow logs size by up to <em>83%</em> compared to the default aggregation interval of 5 seconds. Configuring your flow log aggregation can seriously affect your traffic visibility and storage costs.</p>
+<h2 id="step8">Congratulations!</h2>
+<p>You have configured a VPC network, enabled VPC Flow Logs, and created a web server in that network. Then, you generated HTTP traffic to the web server, viewed the traffic logs in the Cloud Console, and analyzed the traffic logs in BigQuery. Finally, you used VPC Flow Log aggregation for balancing your traffic visibility and storage cost.</p>
+<p>There are multiple use cases for VPC Flow Logs. For example, you might use VPC Flow Logs to determine where your applications are being accessed from in order to optimize network traffic expense, to create HTTP load balancers to balance traffic globally, or to deny unwanted IP addresses with Cloud Armor.</p>
+<h2 id="step9">End your lab</h2>
+<p>When you have completed your lab, click <strong>End Lab</strong>. Google Cloud Skills Boost removes the resources you’ve used and cleans the account for you.</p>
+<p>You will be given an opportunity to rate the lab experience. Select the applicable number of stars, type a comment, and then click <strong>Submit</strong>.</p>
+<p>The number of stars indicates the following:</p>
+<ul>
+<li>1 star = Very dissatisfied</li>
+<li>2 stars = Dissatisfied</li>
+<li>3 stars = Neutral</li>
+<li>4 stars = Satisfied</li>
+<li>5 stars = Very satisfied</li>
+</ul>
+<p>You can close the dialog box if you don't want to provide feedback.</p>
+<p>For feedback, suggestions, or corrections, please use the <strong>Support</strong> tab.</p>
+
+<p>Copyright 2022 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+
+
+
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">Overview</a></li><li><a href="#step2">Setup and requirements</a></li><li><a href="#step3">Task 1. Configure a custom network with VPC flow logs</a></li><li><a href="#step4">Task 2. Create an Apache web server</a></li><li><a href="#step5">Task 3. Verify that network traffic is logged</a></li><li><a href="#step6">Task 4. Export the network traffic to BigQuery to further analyze the logs</a></li><li><a href="#step7">Task 5. Add VPC flow log aggregation</a></li><li><a href="#step8">Congratulations!</a></li><li><a href="#step9">End your lab</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+<script data-glue-cookie-notification-bar-category='2B' src='https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.js'></script>
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab, you configure a network to record traffic to and from an apache web server using VPC Flow Logs. You will then export the logs to BigQuery to analyze them.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+0m setup
+&middot;
+80m access
+&middot;
+80m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>introductory</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/1017">https://googlecoursera.qwiklabs.com/catalog_lab/1017</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="1017" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+

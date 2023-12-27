@@ -1,0 +1,987 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Improving Network Performance I | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-b1b28b59480cca2ab0c23485f64ba2ec8893bdc9.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-484f429ecd41bc910509948cecaf71d98c510234.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-644b7af44e10b6334d7881042d33e7eac427c3b8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-011e84c80a51010837f8d7868d0972aebf80b2b1.js"></script>
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="iqGgVa/yIlIiYUwNh9zGJybKKt8kwsO7D9p5d6+8FHCobyeFTqQjKZYNcXGy2ZWlHOUJEvQddqXC5f5/sblQuw==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:0,&quot;variant&quot;:&quot;original&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;barker&quot;,&quot;community_forum&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;used_in&quot;,&quot;content_provider_admin&quot;,&quot;program_announcements&quot;,&quot;organization_announcements&quot;,&quot;organization_learning_plans&quot;,&quot;course_upgrade&quot;,&quot;show_annual_purchase_now&quot;,&quot;oauth_risc_shutoff&quot;,&quot;program_learning_assignment&quot;,&quot;teams&quot;,&quot;peer_assignment&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;canonical_domain_redirect&quot;,&quot;alexandria_show_bundle_errors&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab, you&#39;ll work on practical elements of performance testing, with an eye to improving network bandwidth in your environment by using different core sizes and internal vs. external networks.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Improving Network Performance I | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab, you&#39;ll work on practical elements of performance testing, with an eye to improving network bandwidth in your environment by using different core sizes and internal vs. external networks.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/32799274?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/32799274?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-2bce1f34bff374bb8e1de389ce3467c39fc4868b.css" media="all" />
+<link rel="stylesheet" href="https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.css" media="screen" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="363efa2ba5fa58c8" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-title-medium'>Improving Network Performance I</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/32799274?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/32799274?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/32799274?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/32799274?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/32799274?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/32799274?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/32799274?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/32799274?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/32799274?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/32799274?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/32799274?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/32799274?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/32799274?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/32799274?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/32799274?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/32799274?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/32799274?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/32799274?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/32799274?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-title-medium'>Justin Ho</h4>
+<p class='ql-body-medium text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-medium text--light'>
+</p>
+<a class="text--green ql-title-small" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-label-medium text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-label-medium text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-label-medium text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+100/100
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create the firewall rule
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create the firewall rule' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+100
+</span>
+/ 100
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Improving Network Performance I&quot;,&quot;lab_name&quot;:&quot;Improving Network Performance I&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='32799274' data-lab-billing-limit='0.0' data-lab-duration='2700' data-lab-instance-id='83848216' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:true}' labDetails='[{&quot;text&quot;:&quot;Open Google Cloud console&quot;,&quot;property&quot;:&quot;console_url&quot;,&quot;resource&quot;:&quot;project_0&quot;,&quot;href&quot;:&quot;https://accounts.google.com/AddSession?service=accountsettings\u0026sarp=1\u0026continue=https%3A%2F%2Fconsole.cloud.google.com%2Fhome%2Fdashboard%3Fproject%3Dqwiklabs-gcp-01-782e28f6514f#Email=student-01-e0414c12a134@qwiklabs.net&quot;,&quot;type&quot;:&quot;button&quot;},{&quot;label&quot;:&quot;Username&quot;,&quot;property&quot;:&quot;username&quot;,&quot;resource&quot;:&quot;user_0&quot;,&quot;value&quot;:&quot;student-01-e0414c12a134@qwiklabs.net&quot;,&quot;type&quot;:&quot;credential&quot;},{&quot;label&quot;:&quot;Password&quot;,&quot;property&quot;:&quot;password&quot;,&quot;resource&quot;:&quot;user_0&quot;,&quot;value&quot;:&quot;YZbtlGkMDeFa&quot;,&quot;type&quot;:&quot;credential&quot;},{&quot;label&quot;:&quot;Project ID&quot;,&quot;property&quot;:&quot;project_id&quot;,&quot;resource&quot;:&quot;project_0&quot;,&quot;value&quot;:&quot;qwiklabs-gcp-01-782e28f6514f&quot;,&quot;type&quot;:&quot;credential&quot;}]' labTimer='{&quot;ticking&quot;:true,&quot;secondsRemaining&quot;:1856}' studentResources='[{&quot;text&quot;:&quot;Compute Engine and the Egress Problem&quot;,&quot;icon&quot;:&quot;videocam&quot;,&quot;href&quot;:&quot;https://youtu.be/I36InKS1oZQ&quot;},{&quot;text&quot;:&quot;Internal IP vs External IP Performance&quot;,&quot;icon&quot;:&quot;videocam&quot;,&quot;href&quot;:&quot;https://youtu.be/i5uhsbmkQ48&quot;}]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Improving Network Performance I
+</h1>
+<div class='lab-preamble__details ql-title-medium'>
+<span>45 minutes</span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/32799274/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.4324'></div>
+
+</a></div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">GSP045</h2>
+<p><img alt="Google Cloud self-paced labs logo" src="https://cdn.qwiklabs.com/GMOHykaqmlTHiqEeQXTySaMXYPHeIvaqa2qHEzw6Occ%3D"></p>
+
+<h2 id="step2">Overview</h2>
+<p>In this hands-on lab you get to read through some real-world scenarios, recreate the environments, and work on improving the performance of some troubled networks.</p>
+<p>What will be fun to try is comparing the different instances to each other, just like the trouble-shooting use case, so you can prove the results and become familiar with the steps used to improve your own systems' performance.</p>
+<p>This lab was adapted from blog posts by Colt McAnlis: <a href="https://medium.com/@duhroach/core-count-and-the-egress-problem-607fb6b51fa9" target="_blank">Core Count and the Egress problem</a> and <a href="https://medium.com/@duhroach/internal-ip-vs-internal-ip-performance-76f15a650356" target="_blank">Internal IP vs External IP</a>. Colt blogs about Google Cloud network performance on Medium.</p>
+<h2 id="step3">Objectives</h2>
+<ul>
+<li>How to test network connectivity and performance using open source tools</li>
+<li>How to inspect network traffic using open source tools</li>
+<li>How the size of your machine can affect the performance of your network</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Basic knowledge of Google Cloud services (best obtained by having previously taken the labs in the <a href="https://google.qwiklabs.com/quests/23" target="_blank">Google Cloud Essentials</a>)</li>
+<li>Basic Google Cloud networking and TCP/IP knowledge (best obtained by having taken the earlier labs in the Networking in the Google Cloud Quest)</li>
+<li>Basic Unix/Linux command line knowledge</li>
+</ul>
+<h2 id="step4">Setup and requirements</h2>
+<h3>Before you click the Start Lab button</h3>
+<p>Read these instructions. Labs are timed and you cannot pause them. The timer, which starts when you click <strong>Start Lab</strong>, shows how long Google Cloud resources will be made available to you.</p>
+<p>This hands-on lab lets you do the lab activities yourself in a real cloud environment, not in a simulation or demo environment. It does so by giving you new, temporary credentials that you use to sign in and access Google Cloud for the duration of the lab.</p>
+<p>To complete this lab, you need:</p>
+<ul>
+<li>Access to a standard internet browser (Chrome browser recommended).</li>
+</ul>
+<ql-warningbox>
+<strong>Note:</strong> Use an Incognito or private browser window to run this lab. This prevents any conflicts between your personal account and the Student account, which may cause extra charges incurred to your personal account.
+</ql-warningbox>
+<ul>
+<li>Time to complete the lab---remember, once you start, you cannot pause a lab.</li>
+</ul>
+<ql-warningbox>
+<strong>Note:</strong> If you already have your own personal Google Cloud account or project, do not use it for this lab to avoid extra charges to your account.
+</ql-warningbox>
+
+<h3>How to start your lab and sign in to the Google Cloud console</h3>
+<ol>
+<li>
+<p>Click the <strong>Start Lab</strong> button. If you need to pay for the lab, a pop-up opens for you to select your payment method.
+On the left is the <strong>Lab Details</strong> panel with the following:</p>
+<ul>
+<li>The <strong>Open Google Cloud console</strong> button</li>
+<li>Time remaining</li>
+<li>The temporary credentials that you must use for this lab</li>
+<li>Other information, if needed, to step through this lab</li>
+</ul>
+</li>
+<li>
+<p>Click <strong>Open Google Cloud console</strong> (or right-click and select <strong>Open Link in Incognito Window</strong> if you are running the Chrome browser).</p>
+<p>The lab spins up resources, and then opens another tab that shows the <strong>Sign in</strong> page.</p>
+<p><strong><em>Tip:</em></strong> Arrange the tabs in separate windows, side-by-side.</p>
+<ql-infobox>
+<strong>Note: </strong>If you see the <strong>Choose an account</strong> dialog, click <strong>Use Another Account</strong>.        
+ </ql-infobox>
+</li>
+<li>
+<p>If necessary, copy the <strong>Username</strong> below and paste it into the <strong>Sign in</strong> dialog.</p>
+<ql-code-block nowrap templated="">
+ {{{user_0.username | "Username"}}}
+ </ql-code-block>
+<p>You can also find the <strong>Username</strong> in the <strong>Lab Details</strong> panel.</p>
+</li>
+<li>
+<p>Click <strong>Next</strong>.</p>
+</li>
+<li>
+<p>Copy the <strong>Password</strong> below and paste it into the <strong>Welcome</strong> dialog.</p>
+<ql-code-block nowrap templated="">
+ {{{user_0.password | "Password"}}}
+ </ql-code-block>
+<p>You can also find the <strong>Password</strong> in the <strong>Lab Details</strong> panel.</p>
+</li>
+<li>
+<p>Click <strong>Next</strong>.</p>
+<ql-infobox>
+<strong>Important: </strong>You must use the credentials the lab provides you. Do not use your Google Cloud account credentials. 
+ </ql-infobox>
+<ql-warningbox>
+<strong>Note: </strong>Using your own Google Cloud account for this lab may incur extra charges.
+ </ql-warningbox>
+</li>
+<li>
+<p>Click through the subsequent pages:</p>
+<ul>
+<li>Accept the terms and conditions.</li>
+<li>Do not add recovery options or two-factor authentication (because this is a temporary account).</li>
+<li>Do not sign up for free trials.</li>
+</ul>
+</li>
+</ol>
+<p>After a few moments, the Google Cloud console opens in this tab.</p>
+<ql-infobox>
+<strong>Note:</strong> To view a menu with a list of Google Cloud products and services, click the <strong>Navigation menu</strong> at the top-left.
+<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/nUxFb6oRFr435O3t6V7WYJAjeDFcrFb16G9wHWp5BzU%3D">
+</ql-infobox>
+
+<p>The goal of this lab is to show you relationships between the core size and throughput, so the lab comes with 6 instances already built in. They were created when you started the lab.</p>
+<ul>
+<li>In the Cloud Console, navigate to <strong>Navigation menu</strong> &gt; <strong>Compute Engine</strong> &gt; <strong>VM Instances</strong> to see your instances:</li>
+</ul>
+<p><img alt="The VM instances page listing six instances and their details in table format" src="https://cdn.qwiklabs.com/Cg9%2BzXSB14niqn3RwyXt7r%2FX0%2F73HOtUlK40HZ3cBTo%3D"></p>
+<ql-infobox>
+<strong>Note:</strong> your instance region and zone may differ from the ones shown in the screenshot.
+</ql-infobox>
+<h3>Connection test</h3>
+<p>Run a quick connection test to make sure things are working well.</p>
+<ol>
+<li>
+<p><strong>SSH</strong> into <code>instance-1</code> by clicking the SSH button next to its name in the console.</p>
+</li>
+<li>
+<p>In your new shell window ping another one of your instances and run the following command, replacing <code>&lt;external ip address of instance-2&gt;</code> with the <code>instance-2</code> external IP address:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+ping -c 5 &lt;external ip address of instance-2&gt;
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output=""> 
+student-00-aafd1bd9c185@instance-1:~$ ping -c 5 35.194.158.169
+PING 35.194.158.169 (35.194.158.169) 56(84) bytes of data.
+64 bytes from 35.194.158.169: icmp_seq=1 ttl=76 time=1.89 ms
+64 bytes from 35.194.158.169: icmp_seq=2 ttl=76 time=0.409 ms
+64 bytes from 35.194.158.169: icmp_seq=3 ttl=76 time=0.542 ms
+64 bytes from 35.194.158.169: icmp_seq=4 ttl=76 time=0.557 ms
+64 bytes from 35.194.158.169: icmp_seq=5 ttl=76 time=0.559 ms
+--- 35.194.158.169 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4001ms
+rtt min/avg/max/mdev = 0.409/0.792/1.894/0.554 ms
+</ql-code-block>
+<ol start="3">
+<li>Ping another. Replace <code>&lt;external ip address of instance-3&gt;</code> with the <code>instance-3</code> external IP address and <code>ping</code> it:</li>
+</ol>
+<ql-code-block language="plaintext">
+ping -c 5 &lt;external ip address of instance-3&gt;
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-1:~$ ping -c 5 35.194.187.75
+PING 35.194.187.75 (35.194.187.75) 56(84) bytes of data.
+64 bytes from 35.194.187.75: icmp_seq=1 ttl=64 time=1.59 ms
+64 bytes from 35.194.187.75: icmp_seq=2 ttl=64 time=0.336 ms
+64 bytes from 35.194.187.75: icmp_seq=3 ttl=64 time=0.338 ms
+64 bytes from 35.194.187.75: icmp_seq=4 ttl=64 time=0.302 ms
+64 bytes from 35.194.187.75: icmp_seq=5 ttl=64 time=0.270 ms
+--- 35.194.187.75 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 3999ms
+rtt min/avg/max/mdev = 0.270/0.568/1.596/0.514 ms
+</ql-code-block>
+<p>Everything looks good, continue on!</p>
+<h3>Review firewall rules</h3>
+<p>Firewall rules were also created for this lab.</p>
+<ul>
+<li>To see what they are, navigate to <strong>Navigation menu</strong> &gt; <strong>Networking</strong> &gt; <strong>VPC networks &gt; Firewall</strong> and click on the <code>iperftesting</code> firewall.</li>
+</ul>
+<p>The firewall rule <strong>iperftesting</strong> uses following configuration:</p>
+<table>
+
+<tr>
+<th><strong>Field</strong></th>
+<th><strong>Value</strong></th>
+<th><strong>Comments</strong></th>
+</tr>
+
+
+<tr>
+<td>Name</td>
+<td>iperftesting</td>
+<td>New rule name</td>
+</tr>
+<tr>
+<td>Targets</td>
+<td>All instances in the network</td>
+<td></td>
+</tr>
+<tr>
+<td>Source IP ranges</td>
+<td>0.0.0.0/0</td>
+<td>We will open the firewall for any IP address from the Internet.</td>
+</tr>
+<tr>
+<td>Protocols and ports</td>
+<td>tcp:5001; udp:5001</td>
+<td></td>
+</tr>
+<tr>
+<td>Direction of traffic</td>
+<td>Ingress</td>
+<td></td>
+</tr>
+<tr>
+<td>Action on match</td>
+<td>Allow</td>
+<td></td>
+</tr>
+
+</table>
+<p>Now you're ready to start using the lab.</p>
+<h2 id="step5">Use case 1: Networking and Compute Engine core count</h2>
+<p>In this first scenario you'll see how the size of the machines being used affects throughput that you can measure.</p>
+<p><em>Dobermanifesto</em> is a video microblogging network exclusively for pets. Animal based videos can be uploaded, worldwide, and sent anywhere to be viewed &amp; experienced.</p>
+<p>While transferring data to/from their Compute Engine backends, their observed bandwidth was not as high as they were hoping for:</p>
+<p><img alt="The line graph: Dobermanifesto same-zone throughput, measured in Gbits per second." src="https://cdn.qwiklabs.com/8aVSnBBimQS947e9qgOfClCR%2FruDDyZ6vpeY%2BUM%2BfAI%3D"></p>
+<h2 id="step6">Task 1. Reproducing behavior</h2>
+<p>To try and reproduce this behavior, two instances in the same zone were created, and <code>iperf</code> was run between them 100x.</p>
+<p><img alt="The line graph: Same zone transfer times 100, measured in Mbits per second" src="https://cdn.qwiklabs.com/RiYTHQDvljDkIJnLPinKjrzqaod85wTbdqXOQ14jLi0%3D"></p>
+<p>This performance is even worse! Obviously something was wrong with the test. We need more information and a deeper set of reproduction steps from the company.</p>
+<p>Now you will set up the scenario.</p>
+<h3>Dobermanifesto's environment</h3>
+<ol>
+<li>
+<p>Return to the VM instances list in the Compute Engine console.</p>
+</li>
+<li>
+<p>SSH into <code>instance-1</code> (1vCPU 3.75GB) and run this command, setting up an <code>iperf</code> "receiver":</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+iperf -s
+</ql-code-block>
+<ol start="3">
+<li>Then SSH into <code>instance-2</code> (1vCPU 3.75GB) and generate <code>iperf</code> traffic pointing at <code>instance-1</code>:</li>
+</ol>
+<ql-code-block language="plaintext">
+iperf -c &lt;external ip address of instance-1&gt;
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-2:~$ iperf -c 35.225.180.44
+------------------------------------------------------------
+Client connecting to 35.225.180.44, TCP port 5001
+TCP window size: 45.0 KByte (default)
+------------------------------------------------------------
+[  3] local 10.20.0.4 port 56330 connected with 35.225.180.44 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3] 0.0000-10.0010 sec  4.66 GBytes  4.00 Gbits/sec
+</ql-code-block>
+<ol start="4">
+<li>Return to <code>instance-1</code> and enter <strong>CTRL</strong> + <strong>C</strong> to end the receiver.</li>
+</ol>
+<h3>Test environment</h3>
+<ol>
+<li>
+<p>Go back to the Compute Engine console and open another SSH window into <code>instance-6</code> (1vCPU e2-micro .6GB).</p>
+</li>
+<li>
+<p>Run the following command, setting it up as a "receiver":</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+iperf -s
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-6:~$ iperf -s
+------------------------------------------------------------
+Server listening on TCP port 5001
+TCP window size: 128 KByte (default)
+------------------------------------------------------------
+</ql-code-block>
+<ol start="3">
+<li>In the <code>instance-2</code> SSH window, test the connection to <code>instance-6</code>:</li>
+</ol>
+<ql-code-block language="plaintext">
+iperf -c &lt;internal ip address of instance-6&gt;
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-2:~$ iperf -c 10.40.0.7
+------------------------------------------------------------
+Client connecting to 10.40.0.7, TCP port 5001
+TCP window size: 45.0 KByte (default)
+------------------------------------------------------------
+[  3] local 10.40.0.5 port 54029 connected with 10.40.0.7 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  2.29 GBytes  1.96 Gbits/sec
+</ql-code-block>
+<ol start="4">
+<li>Return to <code>instance-6</code> and enter <strong>CTRL</strong> + <strong>C</strong> to end the receiver.</li>
+</ol>
+<p>What happened? Bandwidth appears to have gone up. It may have in your case as well. It may have been less.</p>
+<p>In the next section you will see how bandwidth is constrained by total core count, and that with core counts in this small range (core count of 1), the bandwidth will never exceed 2 Gbits/sec or so. As a result, the network speed is slow and bandwidth constrained, and similar to what <em>Dobermanifesto</em> was experiencing. When you test with 4-cpu machines in a minute, the results will be greater.</p>
+<h3>The number of cores correlates to Gb/s</h3>
+<p>Why weren't the results much different? The <a href="https://cloud.google.com/compute/docs/networks-and-firewalls#egress_throughput_caps" target="_blank">documentation for Compute Engine</a> states:</p>
+<p><em>Outbound or egress traffic from a virtual machine is subject to maximum network egress throughput caps. These caps are dependent on the number of vCPUs that a virtual machine instance has. Each core is subject to a 2 Gbits/second (Gbps) cap for peak performance. Each additional core increases the network cap, up to a theoretical maximum of 16 Gbps for each virtual machine</em></p>
+<p>This means that the more virtual CPUs in your network, the more networking throughput you will get.</p>
+<p>In order to figure out what this looks like in practice, different core size groups were set up in the same zone, and iperf was run between them 1000 times.</p>
+<p><img alt="The bar chart: RCP Throughput by instance type, times 1000, displaying the difference between average and maximum." src="https://cdn.qwiklabs.com/M8BRX1KjRhymUkIecOjMyxRidcAUdVhzj9DUyKfaE1w%3D"></p>
+<p>As the core count goes up, so does the avg and max throughput. Even with this simple test, you can see that hard 16Gbps limit on the higher machines.</p>
+<ql-infobox><strong>Note:</strong> If you run iperf with multiple threads (~8 or so) you can exceed 10Gbps, and get up to about 16Gbps using a e2-standard-16 or larger. We don't have that size of a machine in this lab environment, but let's do a test with multiple threads next. </ql-infobox>
+<ql-infobox>
+There are also <a href="https://cloud.google.com/compute/docs/networking/configure-vm-with-high-bandwidth-configuration" target="_blank">higher-cost VMs in the N2, N2D, C2, or C2D series</a> that allow you to select a high bandwidth Tier 1 config and reach 50-100 Gbps.
+</ql-infobox>
+<h2 id="step7">Task 2. How to improve results</h2>
+<p>The network that <em>Dobermanifesto</em> has uses 1vCPU machines. Increasing the size of the core will probably help <em>Dobermanifesto</em> achieve better results. Time to test this theory.</p>
+<ol>
+<li>SSH into <code>instance-3</code> (4vCPU 15GB memory) and run this command:</li>
+</ol>
+<ql-code-block language="plaintext">
+iperf -s
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-3:~$ iperf -s
+------------------------------------------------------------
+Server listening on TCP port 5001
+TCP window size: 128 KByte (default)
+------------------------------------------------------------
+</ql-code-block>
+<ol start="2">
+<li>SSH into <code>instance-4</code> (4vCPU 15GB memory):</li>
+</ol>
+<ql-code-block language="plaintext">
+iperf -c &lt;internal ip address of instance-3&gt;
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-4:~$ iperf -c 10.40.0.2
+------------------------------------------------------------
+Client connecting to 10.40.0.2, TCP port 5001
+TCP window size: 45.0 KByte (default)
+------------------------------------------------------------
+[  3] local 10.40.0.4 port 54081 connected with 10.40.0.2 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  8.93 GBytes  7.67 Gbits/sec
+</ql-code-block>
+<ol start="3">
+<li>Now try it again with 4 threads:</li>
+</ol>
+<ql-code-block language="plaintext">
+iperf -c &lt;internal ip address of instance-3&gt; -P4
+</ql-code-block>
+<ol start="4">
+<li>And with 8 threads:</li>
+</ol>
+<ql-code-block language="plaintext">
+iperf -c &lt;internal ip address of instance-3&gt; -P8
+</ql-code-block>
+<ol start="5">
+<li>Return to <code>instance-3</code> and enter <strong>CTRL</strong> + <strong>C</strong> to end the receiver.</li>
+</ol>
+<p>In these experiments, both the server and client were 4vCPUs, and the speed was greatly increased. The transfer rate was increased by 6.64 GBytes, and the Bandwidth by 5.71 Gbits/sec. With multiple threads, the performance was able to reach the cap for that core count.</p>
+<ol start="6">
+<li>Continue testing with <code>instance-5</code>, which is a higher performance 4vCPU machine, instance type "highcpu-4".</li>
+</ol>
+<p>This instance type has faster CPUs, but less memory. What differences do you see, if any? With multiple threads?</p>
+<p>Now the <em>Dobermanifesto</em> team needs to decide what route to take. After profiling their CPU usage and taking a look at the <a href="https://cloud.google.com/compute/pricing" target="_blank">pricing info</a>, they decided to go with a e2-standard-4 machine, which gave them almost 4x the increase in average throughput, but cheaper than the e2-standard-8 machines.</p>
+<p>One of the nice things about moving to the larger machine is that it actually runs less frequently. It turns out that their machines were spending a lot of time staying awake, just to transfer data. With the new machine size, their instances had more downtime, allowing the load balancer to reduce the total number of instances on a daily basis. So on one hand, they ended up paying for a higher-grade machine, but on the other hand, they will use less core-hours on a monthly basis.</p>
+<p>Once your performance directly impacts the bottom line, there's a lot of nuanced tradeoffs to consider.</p>
+<h2 id="step8">Use case 2: Google Cloud networking with internal IPs</h2>
+<p>In this next example, you'll use <code>iperf</code> to test throughput speed. You'll set up one machine as the server, and then point other machines to it and compare the results.</p>
+<p><em>Gecko Protocol</em>, a B2B company offering a custom, light-weight networking protocol built for gaming and other real-time graphics systems, were seeing lower-than-expected throughput for their backend machines which were responsible for transferring and transcoding large video &amp; graphics files.</p>
+<p>Here's the results of their baseline iperf test:</p>
+<ql-code-block output="">
+------------------------------------------------------------
+Client connecting to 104.155.145.79, TCP port 5001 TCP window size: 45.0 KByte (default)
+------------------------------------------------------------
+[ 3] local 10.128.0.3 port 53504 connected with 104.155.145.79 port 5001 [ ID] Interval Transfer Bandwidth [ 3] 0.0-10.0 sec 1.03 GBytes 884 Mbits/sec
+</ql-code-block>
+<p>When duplicating the test, the network setup was identical, but the test results were quite different:</p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-2:~$ iperf -c 10.128.0.2
+------------------------------------------------------------
+Client connecting to 10.128.0.2, TCP port 5001
+TCP window size: 45.0 KByte (default)
+------------------------------------------------------------
+[  3] local 10.128.0.3 port 38978 connected with 10.128.0.2 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  2.27 GBytes  1.95 Gbits/sec
+</ql-code-block>
+<p>1.95GB / sec was much higher than what <em>Gecko Protocol</em> was seeing in their graphs. So what's going on?</p>
+<p>Now recreate this scenario.</p>
+<ol>
+<li>In the Console, SSH into <code>instance-1</code> and set up the iperf receiver:</li>
+</ol>
+<ql-code-block language="plaintext">
+iperf -s
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-1:~$ iperf -s
+------------------------------------------------------------
+Server listening on TCP port 5001
+TCP window size: 128 KByte (default)
+------------------------------------------------------------
+</ql-code-block>
+<ol start="2">
+<li>SSH into <code>instance-2</code> and check the connection of the external IP address:</li>
+</ol>
+<ql-code-block language="plaintext">
+iperf -c &lt;external ip address of instance-1&gt;
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-2:~$ iperf -c 35.201.145.135
+------------------------------------------------------------
+Client connecting to 35.201.145.135, TCP port 5001
+TCP window size: 45.0 KByte (default)
+------------------------------------------------------------
+[  3] local 10.40.0.8 port 58691 connected with 35.201.145.135 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.36 GBytes  1.16 Gbits/sec
+</ql-code-block>
+<p>After further discussion with <em>Gecko Protocol</em>, it was learned that they were using <em>external</em> IPs to connect their machines, and the test used <em>internal</em> IPs. When the machines are in a network, connecting them with internal IPs will result in faster throughput.</p>
+<ol start="3">
+<li>Now check the connection with the internal address:</li>
+</ol>
+<ql-code-block language="plaintext">
+iperf -c &lt;internal ip address of instance-1&gt;
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-2:~$ iperf -c 10.40.0.5
+------------------------------------------------------------
+Client connecting to 10.40.0.5, TCP port 5001
+TCP window size: 45.0 KByte (default)
+------------------------------------------------------------
+[  3] local 10.40.0.8 port 42950 connected with 10.40.0.5 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  2.26 GBytes  1.94 Gbits/sec
+</ql-code-block>
+<p>Look at the two different Transfer and Bandwidth rates. In this example, changing to the internal IP address resulted in a .9 GBytes improvement in transfer rate, and .78 Gbits/sec improvement in bandwidth. You just proved that the internal connection is faster.</p>
+<p>Building on what you learned from solving the <em>Dobermanifesto</em> problem, can the network speed be improved even more by using a larger machine? <code>instance-2</code> is only 1vCPU. How fast will the connection be if the machine is a little larger? Or a lot larger? Continue to test using the internal IP address (but feel free to test the external one, too, if you have time).</p>
+<h3>4 x vCPU machine</h3>
+<ul>
+<li>SSH into <code>instance-3</code> and test the connection with the internal IP address:</li>
+</ul>
+<ql-code-block language="plaintext">
+iperf -c &lt;internal ip address of instance-1&gt;
+</ql-code-block>
+<p><strong>Example output (your results may differ):</strong></p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-3:~$ iperf -c 10.40.0.5
+------------------------------------------------------------
+Client connecting to 10.40.0.5, TCP port 5001
+TCP window size: 45.0 KByte (default)
+------------------------------------------------------------
+[  3] local 10.40.0.6 port 39115 connected with 10.40.0.5 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  4.53 GBytes  3.89 Gbits/sec
+</ql-code-block>
+<h3>4 highCPU machine</h3>
+<ul>
+<li>SSH into <code>instance-5</code> and test the connection with the internal IP address:</li>
+</ul>
+<ql-code-block language="plaintext">
+iperf -c &lt;internal ip address of instance-1&gt;
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+student-00-aafd1bd9c185@instance-5:~$ iperf -c 10.40.0.5
+------------------------------------------------------------
+Client connecting to 10.40.0.5, TCP port 5001
+TCP window size: 45.0 KByte (default)
+------------------------------------------------------------
+[  3] local 10.40.0.3 port 39736 connected with 10.40.0.5 port 5001
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  10.3 GBytes  8.84 Gbits/sec
+</ql-code-block>
+<p>This really improves the throughput rate.</p>
+<p>Looks like <em>Gecko Protocol</em> will also need to think about what size core will be best. This small debugging session resulted in their video and graphics data transfer improving by ~14x. Which is immense, considering their offering is built on performance backend services for high-performance compute scenarios.</p>
+<h2 id="step9">Task 3. Testing in your own environment</h2>
+<p>This lab doesn't cover how to test your own system, but here's additional information to take back with you. For more information on testing your own network, please read <a href="https://www.linode.com/docs/networking/diagnostics/diagnosing-network-speed-with-iperf" target="_blank">Diagnosing Network Speed with Iperf</a>.</p>
+<p>If you have time and want to set up a VM to test, feel free. When you create your VMs, make sure to use the "iperftest' firewall rule &amp; tag. Test both your internal and external IP address.</p>
+<h3>Settings for testing your own network speed</h3>
+<ol>
+<li>
+<p>In the Console, go to <strong>Navigation menu</strong> &gt; <strong>Networking</strong> &gt; <strong>VPC networks</strong> &gt; <strong>Firewall</strong>.</p>
+</li>
+<li>
+<p>Click on <strong>Create firewall rule</strong>. Use the following configuration to create a firewall rule:</p>
+</li>
+</ol>
+<table>
+
+<tr>
+<th><strong>Field</strong></th>
+<th><strong>Value</strong></th>
+<th><strong>Comments</strong></th>
+</tr>
+
+
+<tr>
+<td>Name</td>
+<td>iperf-testing</td>
+<td>New rule name</td>
+</tr>
+<tr>
+<td>Targets</td>
+<td>All instances in the network</td>
+<td></td>
+</tr>
+<tr>
+<td>Source IP ranges</td>
+<td>0.0.0.0/0</td>
+<td>We will open the firewall for any IP address from the Internet.</td>
+</tr>
+<tr>
+<td>Direction of traffic</td>
+<td>ingress</td>
+<td></td>
+</tr>
+<tr>
+<td>Action on match</td>
+<td>Allow</td>
+<td></td>
+</tr>
+<tr>
+<td>Protocols and ports</td>
+<td>tcp:5001; udp:5001</td>
+<td></td>
+</tr>
+
+</table>
+<ol start="3">
+<li>Click <strong>Create</strong>.</li>
+</ol>
+<p>Click <strong>Check my progress</strong> to verify the objective. <ql-activity-tracking step="1"> Create the firewall rule </ql-activity-tracking></p>
+<p>The tendency is to get the workload as close to 100% as possible, which leaves little space for the disk to defrag, etc.</p>
+<p>90-93% if usage is healthy, but 98% usage will see performance go down since you'll end up with lots of contention.</p>
+<p>When you're testing, if the IO performance decays, look at throttle counters. If they're not being throttled, look at cpu usage. If it's high, there's the problem.</p>
+<h2 id="step10">Task 4. If you have more time</h2>
+<p>In the lab interface, under Student Resources on the left-hand side, you'll see links to videos related to this lab. Very worth watching!</p>
+<p><img alt="The Student Resources sections with links to Compute Engine and the Egress Problem, and Internal IP vs External IP Performance" src="https://cdn.qwiklabs.com/ljTq6fUf03g%2Bi%2FX3eHU0WU0fdsT1u4myssx0gaq9KZI%3D"></p>
+<h2 id="step11">Congratulations!</h2>
+<p>Congratulations! In this lab, you learned how to test network connectivity and performance using open source tools, and how the size of your machine can affect the performance of your network.</p>
+
+
+<h3>Next steps / learn more</h3>
+<ul>
+<li>Work through the Google Cloud post <a href="https://cloudplatform.googleblog.com/2016/09/uusing-Googles-cloud-networking-products-a-guide-to-all-the-guides.html" target="_blank">Using Google's cloud networking products: a guide to all the guides</a>.</li>
+<li>Read the <a href="https://cloud.google.com/compute/docs/networking?hl=en" target="_blank">Compute Engine Networking Documentation</a>.</li>
+<li>Learn about <a href="https://cloud.google.com/compute/docs/subnetworks" target="_blank">Subnetworks</a>.</li>
+<li>Post questions and find answers on Stackoverflow under the <a href="http://stackoverflow.com/questions/tagged/google-compute-engine" target="_blank">google-compute-engine</a> or <a href="http://stackoverflow.com/questions/tagged/google-cloud-platform" target="_blank">google-cloud-platform</a> tags.</li>
+</ul>
+<h3>Google Cloud training and certification</h3>
+<p>...helps you make the most of Google Cloud technologies. <a href="https://cloud.google.com/training/courses" target="_blank">Our classes</a> include technical skills and best practices to help you get up to speed quickly and continue your learning journey. We offer fundamental to advanced level training, with on-demand, live, and virtual options to suit your busy schedule. <a href="https://cloud.google.com/certification/" target="_blank">Certifications</a> help you validate and prove your skill and expertise in Google Cloud technologies.</p>
+
+<p><strong>Manual Last Updated October 04, 2023</strong></p>
+<p><strong>Lab Last Tested October 04, 2023</strong></p>
+<p>Copyright 2023 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+
+
+
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">GSP045</a></li><li><a href="#step2">Overview</a></li><li><a href="#step3">Objectives</a></li><li><a href="#step4">Setup and requirements</a></li><li><a href="#step5">Use case 1: Networking and Compute Engine core count</a></li><li><a href="#step6">Task 1. Reproducing behavior</a></li><li><a href="#step7">Task 2. How to improve results</a></li><li><a href="#step8">Use case 2: Google Cloud networking with internal IPs</a></li><li><a href="#step9">Task 3. Testing in your own environment</a></li><li><a href="#step10">Task 4. If you have more time</a></li><li><a href="#step11">Congratulations!</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+<script data-glue-cookie-notification-bar-category='2B' src='https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.js'></script>
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab, you'll work on practical elements of performance testing, with an eye to improving network bandwidth in your environment by using different core sizes and internal vs. external networks.
+</p>
+<p>
+This lab is included in the quest
+<a href="/quests/46">Network Performance and Optimization</a>.
+If you complete this lab you&#39;ll receive credit for it when you enroll in this quest.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+1m setup
+&middot;
+45m access
+&middot;
+45m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>intermediate</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/1050">https://googlecoursera.qwiklabs.com/catalog_lab/1050</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="1050" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+

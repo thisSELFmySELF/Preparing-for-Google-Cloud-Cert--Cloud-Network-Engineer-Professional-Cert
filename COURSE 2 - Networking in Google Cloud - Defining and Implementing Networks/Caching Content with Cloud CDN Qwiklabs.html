@@ -1,0 +1,721 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Caching Content with Cloud CDN | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-b1b28b59480cca2ab0c23485f64ba2ec8893bdc9.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-484f429ecd41bc910509948cecaf71d98c510234.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-644b7af44e10b6334d7881042d33e7eac427c3b8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-011e84c80a51010837f8d7868d0972aebf80b2b1.js"></script>
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="mwqeE+O1dNI0iJoem3nDGpdrjPRUXh4xkpjACqPAOyM2rHskUkcyYU2qMuwUVEwne1gMOmMK1h2rSvGg6jXwHw==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:0,&quot;variant&quot;:&quot;original&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;barker&quot;,&quot;community_forum&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;used_in&quot;,&quot;content_provider_admin&quot;,&quot;program_announcements&quot;,&quot;organization_announcements&quot;,&quot;organization_learning_plans&quot;,&quot;course_upgrade&quot;,&quot;show_annual_purchase_now&quot;,&quot;oauth_risc_shutoff&quot;,&quot;program_learning_assignment&quot;,&quot;teams&quot;,&quot;peer_assignment&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;canonical_domain_redirect&quot;,&quot;alexandria_show_bundle_errors&quot;,&quot;search_updates&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab, you configure Cloud CDN for a backend bucket and verify caching of an image.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Caching Content with Cloud CDN | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab, you configure Cloud CDN for a backend bucket and verify caching of an image.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/32796643?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/32796643?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-2bce1f34bff374bb8e1de389ce3467c39fc4868b.css" media="all" />
+<link rel="stylesheet" href="https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.css" media="screen" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="afaf19865b921e1a" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-title-medium'>Caching Content with Cloud CDN</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/32796643?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/32796643?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/32796643?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/32796643?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/32796643?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/32796643?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/32796643?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/32796643?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/32796643?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/32796643?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/32796643?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/32796643?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/32796643?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/32796643?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/32796643?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/32796643?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/32796643?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/32796643?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/32796643?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-title-medium'>Justin Ho</h4>
+<p class='ql-body-medium text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-medium text--light'>
+</p>
+<a class="text--green ql-title-small" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-label-medium text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-label-medium text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-label-medium text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+—/10
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create and populate a Cloud Storage bucket
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create and populate a Cloud Storage bucket' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+</span>
+/ 5
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create the HTTP Load Balancer with Cloud CDN
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create the HTTP Load Balancer with Cloud CDN' step_no='2'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+</span>
+/ 5
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Caching Content with Cloud CDN&quot;,&quot;lab_name&quot;:&quot;Caching Content with Cloud CDN&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='32796643' data-lab-billing-limit='0.0' data-lab-duration='3600' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:false}' labDetails='[]' labTimer='{&quot;ticking&quot;:false,&quot;secondsRemaining&quot;:3600}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Caching Content with Cloud CDN
+</h1>
+<div class='lab-preamble__details ql-title-medium'>
+<span>1 hour</span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/32796643/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.2731'></div>
+
+</a></div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">Overview</h2>
+<p>In this lab, you configure Cloud Content Delivery Network (Cloud CDN) for a backend bucket and verify caching of an image. Cloud CDN uses Google's globally distributed edge points of presence to cache HTTP(S) load-balanced content close to your users. Caching content at the edges of Google's network provides faster delivery of content to your users while reducing serving costs.</p>
+<p>For an up-to-date list of Google's Cloud CDN cache sites, refer to this documentation: <a href="https://cloud.google.com/cdn/docs/locations" target="_blank">https://cloud.google.com/cdn/docs/locations</a></p>
+<h3>Objectives</h3>
+<p>In this lab, you  learn how to perform the following tasks:</p>
+<ul>
+<li>Create and populate a Cloud Storage bucket</li>
+<li>Create an HTTP load balancer with Cloud CDN</li>
+<li>Verify the caching of your bucket's content</li>
+</ul>
+<p>For each lab, you get a new Google Cloud project and set of resources for a fixed time at no cost.</p>
+<ol>
+<li>
+<p>Sign in to Qwiklabs using an <strong>incognito window</strong>.</p>
+</li>
+<li>
+<p>Note the lab's access time (for example, <code>1:15:00</code>), and make sure you can finish within that time.<br>
+There is no pause feature. You can restart if needed, but you have to start at the beginning.</p>
+</li>
+<li>
+<p>When ready, click <strong>Start lab</strong>.</p>
+</li>
+<li>
+<p>Note your lab credentials (<strong>Username</strong> and <strong>Password</strong>). You will use them to sign in to the Google Cloud Console.</p>
+</li>
+<li>
+<p>Click <strong>Open Google Console</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Use another account</strong> and copy/paste credentials for <strong>this</strong> lab into the prompts.<br>
+If you use other credentials, you'll receive errors or <strong>incur charges</strong>.</p>
+</li>
+<li>
+<p>Accept the terms and skip the recovery resource page.</p>
+</li>
+</ol>
+<aside class="warning"><p><strong>Note:</strong> Do not click <strong>End Lab</strong> unless you have finished the lab or want to restart it. This clears your work and removes the project.
+  </p>
+</aside>
+<h2 id="step2">Task 1. Create and populate a Cloud Storage bucket</h2>
+<p>Cloud CDN content can originate from two types of backends:</p>
+<ul>
+<li>Google Compute Engine virtual machine (VM) instance groups</li>
+<li>Google Cloud Storage buckets</li>
+</ul>
+<p>In this lab, you configure a Cloud Storage bucket as the backend.</p>
+<h3><strong>Create a unique Cloud Storage bucket</strong></h3>
+<ol>
+<li>In the Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D" title="Navigation menu">), click <strong>Cloud Storage</strong> &gt; <strong>Buckets</strong>.</li>
+<li>Click <strong>Create bucket</strong>.</li>
+<li>For the name, enter a globally unique value, and click <strong>Continue</strong>.</li>
+<li>For the <strong>Location Type</strong>, select <strong>Region</strong>.</li>
+<li>For the <strong>Location</strong>, choose a location that is either halfway around the world from you or at least on a different continent. (This provides a greater difference between accessing the image with and without Cloud CDN enabled.)</li>
+<li>Click <strong>Continue</strong>, and then click <strong>Choose how to control access to objects</strong>.</li>
+<li>Clear <strong>Enforce public access prevention on this bucket</strong> and select <strong>Fine-grained</strong> then click <strong>Create</strong>.</li>
+</ol>
+<aside class="special"><p><strong>Note: </strong>Even if the <strong><b>Enforce public access prevention on this bucket</b></strong>checkbox is cleared, the project's organization policy can still deny public access to the bucket contents.</p>
+</aside>
+<ol start="8">
+<li>
+<p>Note the name of your storage bucket for the next subtask. It will be referred to as <code>[your-storage-bucket]</code>.</p>
+</li>
+</ol>
+<h3><strong>Copy an image file into your bucket</strong></h3>
+<p>Copy an image from a public Cloud Storage bucket to your own bucket.</p>
+<ol>
+<li>
+<p>In the Cloud Console, click <strong>Activate Cloud Shell</strong> (<img alt="Cloud Shell" src="https://cdn.qwiklabs.com/ep8HmqYGdD%2FkUncAAYpV47OYoHwC8%2Bg0WK%2F8sidHquE%3D" title="Cloud Shell">).</p>
+</li>
+<li>
+<p>If prompted, click <strong>Continue</strong>.</p>
+</li>
+<li>
+<p>Run the following command in Cloud Shell, replacing <code>[your-storage-bucket]</code> with your bucket's name:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+gsutil cp gs://cloud-training/gcpnet/cdn/cdn.png gs://[your-storage-bucket]
+</ql-code-block>
+<ol start="4">
+<li>
+<p>In the Cloud Console, click <strong>Refresh Bucket</strong> to verify that the image was copied.</p>
+</li>
+<li>
+<p>Publish Cloud Storage image file to the web with following command:</p>
+</li>
+</ol>
+<ql-code-block language="bash">
+ gsutil acl ch -u AllUsers:R gs://[your-storage-bucket]/cdn.png
+</ql-code-block>
+<ol start="6">
+<li>
+<p>Click on the <strong>Public Link</strong> under <strong>Public access</strong> to verify that you can access the image.</p>
+</li>
+<li>
+<p>Exit <strong>Cloud Shell</strong>:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+exit
+</ql-code-block>
+<p>Click <strong>Check my progress</strong> to verify the objective.
+<ql-activity-tracking step="1">
+Create and populate a Cloud Storage bucket
+</ql-activity-tracking></p>
+<h2 id="step3">Task 2. Create the HTTP load balancer with Cloud CDN</h2>
+<p>HTTP(S) load balancing provides global load balancing for HTTP(S) requests of static content to a Cloud Storage bucket (backend). When you enable Cloud CDN on your backend, your content is cached at a <a href="https://cloud.google.com/cdn/docs/locations" target="_blank">location at the edge of Google's network</a>, which is usually far closer to the user than your backend is.</p>
+<h3><strong>Start the HTTP load balancer Configuration</strong></h3>
+<ol>
+<li>
+<p>In the Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D" title="Navigation menu">), click <strong>Network Services</strong> &gt; <strong>Load balancing</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Create load balancer</strong>.</p>
+</li>
+<li>
+<p>Under <strong>HTTP(S) Load Balancing</strong>, click <strong>Start configuration</strong>.</p>
+</li>
+<li>
+<p>For <strong>Name</strong>, type <strong>cdn-lb</strong>. Click Continue</p>
+</li>
+</ol>
+<h3><strong>Configure the backend</strong></h3>
+<ol>
+<li>Click  <strong>Backend configuration</strong>.</li>
+<li>For <strong>Backend services &amp; backend buckets</strong>, click <strong>Create a backend bucket</strong>.</li>
+<li>For <strong>Name</strong>, type <strong>cdn-bucket</strong>.</li>
+<li>Click <strong>Browse</strong> under <strong>Cloud Storage bucket</strong>.</li>
+<li>Select your bucket, and click <strong>Select</strong>.</li>
+<li>Select <strong>Enable Cloud CDN</strong>.</li>
+<li>Click <strong>Create</strong>.</li>
+</ol>
+<aside class="special"><p>Yes, enabling Cloud CDN is as simple as selecting <b>Enable Cloud CDN</b>!</p>
+</aside>
+<h3><strong>Configure the frontend</strong></h3>
+<p>The host and path rules determine how your traffic will be directed. For example, you could direct video traffic to one backend and image traffic to another backend. However, you are not configuring the Host and path rules in this lab.</p>
+<ol>
+<li>
+<p>Click <strong>Frontend configuration</strong>.</p>
+</li>
+<li>
+<p>Specify the following, leaving all other values with their defaults:</p>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td>Protocol</td>
+<td>HTTP</td>
+</tr>
+<tr>
+<td>IP version</td>
+<td>IPv4</td>
+</tr>
+<tr>
+<td>IP address</td>
+<td>Ephemeral</td>
+</tr>
+<tr>
+<td>Port</td>
+<td>80</td>
+</tr>
+
+</table>
+</li>
+<li>
+<p>Click <strong>Done</strong>.</p>
+</li>
+</ol>
+<h3><strong>Review and create the HTTP load balancer</strong></h3>
+<ol>
+<li>Click <strong>Review and finalize</strong>.</li>
+<li>Review the <strong>Backend Buckets</strong> and <strong>Frontend</strong>.</li>
+<li>Click <strong>Create</strong>.<br>
+Wait for the load balancer to be created.</li>
+<li>Click on the name of the load balancer (<strong>cdn-lb</strong>).</li>
+<li>Note the IP address of the load balancer for the next task. It will be referred to as <code>[LB_IP_ADDRESS]</code>.</li>
+</ol>
+<p>Click <strong>Check my progress</strong> to verify the objective.
+<ql-activity-tracking step="2">
+Create the HTTP Load Balancer with Cloud CDN
+</ql-activity-tracking></p>
+<h2 id="step4">Task 3. Verify the caching of your bucket's content</h2>
+<p>Now that you have created the HTTP load balancer for your bucket and enabled Cloud CDN, it is time to verify that the image is cached on the edge of Google's network.</p>
+<h3><strong>Time the HTTP request for the image</strong></h3>
+<p>One way to verify that the image is cached is to time the HTTP request for the image. The first request should take significantly longer, because content is only cached at an edge location after being accessed through that location.</p>
+<ol>
+<li>In the Cloud Console, click <strong>Activate Cloud Shell</strong> (<img alt="Cloud Shell" src="https://cdn.qwiklabs.com/ep8HmqYGdD%2FkUncAAYpV47OYoHwC8%2Bg0WK%2F8sidHquE%3D" title="Cloud Shell">).</li>
+<li>If prompted, click <strong>Continue</strong>.</li>
+<li>Store the IP address of the load balancer in an environment variable:</li>
+</ol>
+<ql-code-block language="plaintext">
+export LB_IP_ADDRESS=&lt;Enter the IP address of the load balancer&gt;
+</ql-code-block>
+<ol start="4">
+<li>Run the following command 3 times for consecutive HTTP requests:</li>
+</ol>
+<ql-code-block language="plaintext">
+for i in {1..3};do curl -s -w "%{time_total}\n" -o /dev/null http://$LB_IP_ADDRESS/cdn.png; done
+</ql-code-block>
+<p>The output should look like this (<strong>do not copy; this is example output</strong>):</p>
+<ql-code-block language="plaintext">
+1.234357
+0.009600
+0.006652
+</ql-code-block>
+<aside class="special"><p>In this example output, the second and third request take less than 1% of the time of the first request. This demonstrates that the image was cached during the first request and accessed from an edge location on further requests. Depending on how far you placed your storage bucket and where your closest edge location is, you will see different results.</p>
+</aside>
+<h3><strong>Explore the Cloud CDN logs</strong></h3>
+<p>Another way to verify that the image got cached in the previous step, is to explore the Cloud CDN logs. These logs will contain information on when content was cached and when the cache was accessed.</p>
+<aside class="warning"><p>While <a href="https://cloud.google.com/cdn/docs/logging" target="_blank">Cloud CDN logging</a> is in Alpha, the following steps might not work as expected.</p>
+</aside>
+<aside>
+It might take a couple of minutes to select the Cloud CDN logs.<p>
+</p></aside>
+<ol>
+<li>In the Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D" title="Navigation menu">), click <strong>Logging</strong> &gt; <strong>Logs Viewer</strong>.</li>
+<li>Under the <strong>Resources</strong> filter, select <strong>Cloud HTTP Load Balancer &gt; cdn-lb-forwarding-rule &gt; cdn-lb</strong>.</li>
+</ol>
+<aside class="warning"><p>It might take a couple of minutes to select the Cloud CDN logs.</p>
+<p>
+</p></aside>
+<ol start="3">
+<li>
+<p>Expand the first log entry (on top).</p>
+</li>
+<li>
+<p>Within the entry, expand the <strong>httpRequest</strong> and notice that the <strong>cacheLookup</strong> is <em>true</em> but there is no <strong>cacheHit</strong> field.</p>
+<p>This illustrates that the cache did not contain the image on this first request.</p>
+</li>
+<li>
+<p>Expand the <strong>jsonPayload</strong> and notice that the <strong>statusDetails</strong> field contains <em>response_sent_by_backend</em>.</p>
+<p>This also illustrates that the image came from the backend bucket on this first request.</p>
+</li>
+<li>
+<p>Close the current log entry and expand a different log entry.</p>
+</li>
+<li>
+<p>Within the entry, expand the <strong>httpRequest</strong> and notice that the <strong>cacheHit</strong> is <em>true</em>.</p>
+<p>This illustrates that the cache contained the image on this request.</p>
+</li>
+<li>
+<p>Expand the <strong>jsonPayload</strong> and notice that the <strong>statusDetails</strong> field contains <em>response_from_cache</em>.</p>
+<p>This also illustrates that the cache, instead of the backend, provided the image on this request.</p>
+</li>
+</ol>
+<aside class="special"><p>The Cloud CDN logs clearly demonstrate that the image was provided from the backend on the first request. This request filled the cache on the edge location, and all future requests received the image from that cache.</p>
+</aside>
+<h2 id="step5">Task 4. Review</h2>
+<p>In this lab, you configured Cloud CDN for a backend bucket by configuring an HTTP load balancer and enabling Cloud CDN with a simple checkbox. You verified the caching of the bucket's content by accessing an image multiple times and exploring the Cloud CDN logs. The first time you accessed the image, it took longer because the cache of the edge location did not contain the image yet. All other requests were quicker because the image was provided from the cache of the edge location closest to your Cloud Shell instance.</p>
+<p>For an up-to-date list of Google's Cloud CDN cache sites, refer to this documentation: <a href="https://cloud.google.com/cdn/docs/locations" target="_blank">https://cloud.google.com/cdn/docs/locations</a></p>
+<h2 id="step6">End your lab</h2>
+<p>When you have completed your lab, click <strong>End Lab</strong>. Google Cloud Skills Boost removes the resources you’ve used and cleans the account for you.</p>
+<p>You will be given an opportunity to rate the lab experience. Select the applicable number of stars, type a comment, and then click <strong>Submit</strong>.</p>
+<p>The number of stars indicates the following:</p>
+<ul>
+<li>1 star = Very dissatisfied</li>
+<li>2 stars = Dissatisfied</li>
+<li>3 stars = Neutral</li>
+<li>4 stars = Satisfied</li>
+<li>5 stars = Very satisfied</li>
+</ul>
+<p>You can close the dialog box if you don't want to provide feedback.</p>
+<p>For feedback, suggestions, or corrections, please use the <strong>Support</strong> tab.</p>
+<h5>Manual Last Updated: Sept 14, 2022</h5>
+<h5>Lab Last Tested: Sept 14, 2022</h5>
+<p>Copyright 2022 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">Overview</a></li><li><a href="#step2">Task 1. Create and populate a Cloud Storage bucket</a></li><li><a href="#step3">Task 2. Create the HTTP load balancer with Cloud CDN</a></li><li><a href="#step4">Task 3. Verify the caching of your bucket's content</a></li><li><a href="#step5">Task 4. Review</a></li><li><a href="#step6">End your lab</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+<script data-glue-cookie-notification-bar-category='2B' src='https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.js'></script>
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab, you configure Cloud CDN for a backend bucket and verify caching of an image.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+0m setup
+&middot;
+60m access
+&middot;
+60m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>introductory</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/1167">https://googlecoursera.qwiklabs.com/catalog_lab/1167</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="1167" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+

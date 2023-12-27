@@ -1,0 +1,755 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Optimizing Network Spend with Network Tiers | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-b1b28b59480cca2ab0c23485f64ba2ec8893bdc9.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-484f429ecd41bc910509948cecaf71d98c510234.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-644b7af44e10b6334d7881042d33e7eac427c3b8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-011e84c80a51010837f8d7868d0972aebf80b2b1.js"></script>
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="EK5f5OkZ1c5dbyhvQBRNqn2JqIO6msyAHCOp9evjpwxZEXj0Cpgzh4fVUNCBZ0c2Y1IfJdE0XdYNgumY0+uOew==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:0,&quot;variant&quot;:&quot;original&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;barker&quot;,&quot;community_forum&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;used_in&quot;,&quot;content_provider_admin&quot;,&quot;program_announcements&quot;,&quot;organization_announcements&quot;,&quot;organization_learning_plans&quot;,&quot;course_upgrade&quot;,&quot;show_annual_purchase_now&quot;,&quot;oauth_risc_shutoff&quot;,&quot;program_learning_assignment&quot;,&quot;teams&quot;,&quot;peer_assignment&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;canonical_domain_redirect&quot;,&quot;alexandria_show_bundle_errors&quot;,&quot;search_updates&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab, you create one VM in the premium network service tier (default) and one VM in the standard network service tier. Then you compare the latency and routes for each VM instance.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Optimizing Network Spend with Network Tiers | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab, you create one VM in the premium network service tier (default) and one VM in the standard network service tier. Then you compare the latency and routes for each VM instance.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/32797501?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/32797501?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-2bce1f34bff374bb8e1de389ce3467c39fc4868b.css" media="all" />
+<link rel="stylesheet" href="https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.css" media="screen" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="fd527977cf972878" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-title-medium'>Optimizing Network Spend with Network Tiers</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/32797501?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/32797501?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/32797501?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/32797501?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/32797501?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/32797501?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/32797501?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/32797501?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/32797501?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/32797501?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/32797501?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/32797501?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/32797501?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/32797501?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/32797501?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/32797501?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/32797501?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/32797501?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/32797501?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-title-medium'>Justin Ho</h4>
+<p class='ql-body-medium text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-medium text--light'>
+</p>
+<a class="text--green ql-title-small" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-label-medium text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-label-medium text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-label-medium text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+—/10
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create the VM instances
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create the VM instances' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+</span>
+/ 10
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Optimizing Network Spend with Network Tiers&quot;,&quot;lab_name&quot;:&quot;Optimizing Network Spend with Network Tiers&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='32797501' data-lab-billing-limit='0.0' data-lab-duration='3600' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:false}' labDetails='[]' labTimer='{&quot;ticking&quot;:false,&quot;secondsRemaining&quot;:3600}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Optimizing Network Spend with Network Tiers
+</h1>
+<div class='lab-preamble__details ql-title-medium'>
+<span>1 hour</span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/32797501/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.5908'></div>
+
+</a></div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">Overview</h2>
+<p>In this lab, you create one VM in the Premium network service tier (default) and one VM in the Standard network service tier. Then you compare the latency and network paths for each VM instance.</p>
+<p>With network service tiers, Google Cloud enables you to optimize your cloud network for performance by choosing the Premium tier, or for cost with the new Standard tier.</p>
+<h3>Premium tier</h3>
+<p>Premium tier delivers traffic over Google’s well-provisioned, low-latency, highly reliable global network. This network consists of an extensive global private fiber network with over <a href="https://peering.google.com/#/" target="_blank">100 points of presence (POPs)</a> across the globe.</p>
+<p><img alt="Lab architecture network diagram" src="https://cdn.qwiklabs.com/yDhoyJdXRia57%2FE%2FYKbNjSR4%2F1nUDVaXwoHglWcSQz0%3D"></p>
+<h3>Standard tier</h3>
+<p>Standard tier is a new, lower-cost offering. The network quality of this tier is comparable to the quality of other public cloud providers and regional network services, such as regional load balancing with one VIP per region, but lower than the quality of Premium tier.
+<img alt="Standard tier indicated in lab architecture network diagram" src="https://cdn.qwiklabs.com/P2cGycZzLbpuCXiT4qMX8YDQAjD8C7DRgU0rZrYV4%2FI%3D">
+Standard tier is priced lower than Premium because the traffic between Google Cloud and your end user (internet) is delivered over transit (ISP) networks instead of Google’s network.</p>
+<h3>Objectives</h3>
+<p>In this lab, you will learn how to perform the following tasks:</p>
+<ul>
+<li>Create a VM using the Premium network service tier.</li>
+<li>Create a VM using the Standard network service tier.</li>
+<li>Explore the latency and network paths for VMs on different network service tiers.</li>
+</ul>
+<h2 id="step2">Setup and requirements</h2>
+<p>For each lab, you get a new Google Cloud project and set of resources for a fixed time at no cost.</p>
+<ol>
+<li>
+<p>Sign in to Qwiklabs using an <strong>incognito window</strong>.</p>
+</li>
+<li>
+<p>Note the lab's access time (for example, <code>1:15:00</code>), and make sure you can finish within that time.<br>
+There is no pause feature. You can restart if needed, but you have to start at the beginning.</p>
+</li>
+<li>
+<p>When ready, click <strong>Start lab</strong>.</p>
+</li>
+<li>
+<p>Note your lab credentials (<strong>Username</strong> and <strong>Password</strong>). You will use them to sign in to the Google Cloud Console.</p>
+</li>
+<li>
+<p>Click <strong>Open Google Console</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Use another account</strong> and copy/paste credentials for <strong>this</strong> lab into the prompts.<br>
+If you use other credentials, you'll receive errors or <strong>incur charges</strong>.</p>
+</li>
+<li>
+<p>Accept the terms and skip the recovery resource page.</p>
+</li>
+</ol>
+<aside class="warning"><p><strong>Note:</strong> Do not click <strong>End Lab</strong> unless you have finished the lab or want to restart it. This clears your work and removes the project.
+  </p>
+</aside>
+<h2 id="step3">Task 1. Create the VM instances</h2>
+<p>In this task, you create two VM instances and define their network service tier during the instance creation. You can configure the network tier for your VM instances at the project level or at the resource level.</p>
+<h3>Create the Premium tier VM</h3>
+<p>Create a VM instance using the Premium service tier, which is the default.</p>
+<ol>
+<li>
+<p>In the Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Compute Engine &gt; VM instances</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Create Instance</strong>.</p>
+</li>
+<li>
+<p>Specify the following, and leave the remaining settings as their defaults.</p>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td>Name</td>
+<td>vm-premium</td>
+</tr>
+<tr>
+<td>Zone</td>
+<td>us-central1-c</td>
+</tr>
+<tr>
+<td>Series</td>
+<td>E2</td>
+</tr>
+<tr>
+<td>Machine type</td>
+<td>e2-medium (2vCPU, 1 core, 4 GB memory)</td>
+</tr>
+
+</table>
+</li>
+<li>
+<p>Click <strong>Advanced options</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Networking</strong>.</p>
+</li>
+<li>
+<p>In <strong>Network interfaces</strong>, click <strong>default default</strong> to expand the <strong>Network interfaces</strong> settings.</p>
+</li>
+<li>
+<p>Verify that <strong>Network Service Tier</strong> is set to <strong>Premium</strong>.</p>
+</li>
+</ol>
+<ql-infobox><strong>Note: </strong>The <b>Premium</b> tier is currently the default at the project level, but you can change this by clicking the <b>change</b> link. Do not change the project-level tier in this lab!</ql-infobox>
+<ol start="8">
+<li>Click <strong>Done</strong>.</li>
+<li>Click <strong>Create</strong>.</li>
+</ol>
+<h3>Create the Standard tier VM</h3>
+<p>Create a VM instance of the same machine type and in the same zone but use the Standard service tier.</p>
+<ol>
+<li>
+<p>Click <strong>Create Instance</strong>.</p>
+</li>
+<li>
+<p>Specify the following, and leave the remaining settings as their defaults.</p>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td>Name</td>
+<td>vm-standard</td>
+</tr>
+<tr>
+<td>Zone</td>
+<td>us-central1-c</td>
+</tr>
+<tr>
+<td>Series</td>
+<td>E2</td>
+</tr>
+<tr>
+<td>Machine type</td>
+<td>e2-medium (2vCPU, 1 core, 4 GB memory)</td>
+</tr>
+
+</table>
+</li>
+<li>
+<p>Click <strong>Advanced options</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Networking</strong>.</p>
+</li>
+<li>
+<p>In <strong>Network interfaces</strong>, click <strong>default default</strong> to expand the <strong>Network interfaces</strong> settings.</p>
+</li>
+<li>
+<p>In <strong>Network Service Tier</strong>, click <strong>Standard</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Done</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Create</strong>.
+Wait for both instances to be created. This is indicated by green checkmarks next to the instance names.</p>
+</li>
+</ol>
+<ql-infobox><strong>Note: </strong>Both VM instances have the same machine type, zone, and VPC network. The only differences are the network service tier and the instance names.</ql-infobox>
+<ol start="9">
+<li>Note the External IP addresses of <strong>vm-premium</strong> and <strong>vm-standard</strong>. They will be referred to as <em>[premium-IP]</em> and <em>[standard-IP]</em>, respectively.</li>
+</ol>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="1">
+Create the VM instances
+</ql-activity-tracking></p>
+<h2 id="step4">Task 2. Explore the latency and network paths</h2>
+<p>In this task, you explore some of the network performance differences between the Premium tier and Standard tier.</p>
+<h3>Explore the latency for each VM instance</h3>
+<p>In this step, you explore the latency from a third-party service in Europe to your VM instances in us-central1-c. Latency is defined as the round-trip time (RTT), or the time that network packets take to get from one host to the other and back. Lower latency improves user experience and also improves transfer speeds.</p>
+<p><ql-multiple-choice-probe answerindex="0" optiontitles='[
+"Premium tier",
+"Standard tier"
+]' shuffle="" stem="Which network service tier should provide lower latency?">
+</ql-multiple-choice-probe></p>
+<p>In this step, you use the website <a href="https://ping.eu/ping" target="_blank">ping.eu</a> to demonstrate the latency a user in Europe might experience when accessing your server in us-central1-c.</p>
+<ol>
+<li>Open a new browser tab and navigate to <a href="https://ping.eu/ping" target="_blank">ping.eu/ping</a>.</li>
+<li>Type the <em>[premium-IP]</em> in the <strong>IP address or host name</strong> field.</li>
+<li>For <strong>Enter code</strong>, type the captcha code shown onscreen.</li>
+<li>Click <strong>Go</strong>.</li>
+<li>Wait for the four consecutive pings to complete.</li>
+</ol>
+<p>The output should look like this.</p>
+<p><strong>Output example</strong> (yours will differ):</p>
+<ql-code-block language="TXT" output="">
+--- PING 35.202.10.213 (35.202.10.213) 56(84) bytes of data. ---
+64 bytes from 35.202.10.213: icmp_seq=1 ttl=54 time=124 ms
+64 bytes from 35.202.10.213: icmp_seq=2 ttl=54 time=123 ms
+64 bytes from 35.202.10.213: icmp_seq=3 ttl=54 time=123 ms
+64 bytes from 35.202.10.213: icmp_seq=4 ttl=54 time=123 ms
+...
+--- Round Trip Time (rtt) ---
+min 	123.499 ms
+avg 	123.753 ms
+max 	124.225 ms
+</ql-code-block>
+<ql-infobox><strong>Note: </strong>In the example output, the average latency of the Premium tier VM is 123.753 milliseconds.
+</ql-infobox>
+<ol start="6">
+<li>Type the <em>[standard-IP]</em> in the <strong>IP address or host name</strong> field.</li>
+<li>For <strong>Enter code</strong>, type the captcha code shown onscreen.</li>
+<li>Click <strong>Go</strong>.</li>
+<li>Wait for the four consecutive pings to complete.</li>
+</ol>
+<p>The output should look like this.</p>
+<p><strong>Output example</strong> (yours will differ):</p>
+<ql-code-block language="TXT" output="">
+--- PING 35.206.65.89 (35.206.65.89) 56(84) bytes of data. ---
+64 bytes from 35.206.65.89: icmp_seq=1 ttl=69 time=128 ms
+64 bytes from 35.206.65.89: icmp_seq=2 ttl=69 time=127 ms
+64 bytes from 35.206.65.89: icmp_seq=3 ttl=69 time=127 ms
+64 bytes from 35.206.65.89: icmp_seq=4 ttl=69 time=127 ms
+...
+--- Round Trip Time (rtt) ---
+min 	127.746 ms
+avg 	127.986 ms
+max 	128.470 ms
+</ql-code-block>
+<ql-infobox><strong>Note: </strong>In the example output, the average latency of the Standard tier VM is 127.986 milliseconds. Therefore, the Premium tier VM has a 5% lower latency than the Standard tier VM.
+</ql-infobox>
+<ql-warningbox><strong>Note: </strong>This is a very basic test. Passing real application traffic is always the best indicator of latency and performance. You can examine this <a href="https://cloudplatform.googleblog.com/2017/08/introducing-Network-Service-Tiers-your-cloud-network-your-way.html" target="_blank">Google Cloud blog on network service tiers</a> to learn more about performance differences between network tiers.
+</ql-warningbox>
+<h3>Explore the network path for each VM instance</h3>
+<p>Next, explore the network path between a third-party service in Europe and your VM instances in us-central1-c using traceroute. Traceroute shows all Layer 3 (routing layer) hops between hosts; therefore, it can illustrate a network path between hosts.</p>
+<p><ql-multiple-choice-probe answerindex="0" optiontitles='[
+"Premium tier",
+"Standard tier"
+]' shuffle="" stem="Which network service tier should have fewer hops on the public internet?">
+</ql-multiple-choice-probe></p>
+<p>In this step, you use <a href="https://ping.eu/traceroute" target="_blank">ping.eu/traceroute</a> to visualize a network path that traffic from a user in Europe might take when accessing your server in us-central1-c.</p>
+<ol>
+<li>Open a new tab and navigate to <a href="https://ping.eu/traceroute" target="_blank">https://ping.eu/traceroute</a>.</li>
+<li>Type the <em>[premium-IP]</em> in the <strong>IP address or host name</strong> field.</li>
+<li>For <strong>Enter code</strong>, type the captcha code shown onscreen.</li>
+<li>Click <strong>Go</strong>.</li>
+<li>Wait for traceroute to complete.</li>
+</ol>
+<p>The output should look like this.</p>
+<p><strong>Output example</strong> (yours will differ):</p>
+<ql-code-block language="TXT" output="">
+traceroute to 35.202.10.213 (35.202.10.213), 30 hops max, 60 byte packets
+1	 	 	 	*	*	*
+2	core21.fsn1.hetzner.com	213.239.245.237	de	0.293 ms
+     core22.fsn1.hetzner.com	213.239.245.241	de	0.231 ms
+     core21.fsn1.hetzner.com	213.239.245.237	de	0.293 ms
+3	core12.nbg1.hetzner.com	213.239.245.214	de	2.791 ms
+     core11.nbg1.hetzner.com	213.239.224.9	de	2.764 ms
+     core0.fra.hetzner.com	213.239.252.29	de	5.014 ms
+4	core4.fra.hetzner.com	213.239.245.245	de	5.489 ms	5.484 ms
+ 		us
+5	 	 	 	*	*	*
+6	 	 	 	*	*	*
+7	 	 	 	*	*	*
+8	 	 	 	*	*	*
+9	 	 	 	*	*	*
+No reply for 5 hops. Assuming we reached firewall.
+</ql-code-block>
+<ql-infobox><strong>Note: </strong>In the example output, the traffic destined for the Premium tier VM reached Google Cloud's network after the 5th hop. The IP address on hop 4 is listed in Bavaria, Germany, which is the same state as the origin server and an
+<a href="https://peering.google.com/#/infrastructure" target="_blank">Edge Point of Presence (PoP)</a>. Therefore, the Premium network tier traffic entered the Google Cloud network very close to the user, as expected.</ql-infobox>
+<ol start="6">
+<li>Type the <em>[standard-IP]</em> in the <strong>IP address or host name</strong> field.</li>
+<li>For <strong>Enter code</strong>, type the captcha code shown onscreen.</li>
+<li>Click <strong>Go</strong>.</li>
+<li>Wait for traceroute to complete.</li>
+</ol>
+<p>The output should look like this.</p>
+<p><strong>Output example</strong> (yours will differ):</p>
+<ql-code-block language="TXT" output="">
+traceroute to 35.206.65.89 (35.206.65.89), 30 hops max, 60 byte packets
+1	 	 	 	*	*	*
+2	core22.fsn1.hetzner.com	213.239.245.241	de	0.229 ms
+     core21.fsn1.hetzner.com	213.239.245.237	de	0.229 ms
+     core22.fsn1.hetzner.com	213.239.245.241	de	0.229 ms
+3	core12.nbg1.hetzner.com	213.239.224.13	de	2.807 ms
+     core5.fra.hetzner.com	213.239.224.246	de	4.948 ms	4.956 ms
+4	ffm-b4-link.telia.net	213.248.70.2	 	5.023 ms	5.030 ms	5.032 ms
+5	hbg-b1-link.telia.net	213.248.70.0	 	14.883 ms
+     ffm-bb4-link.telia.net	62.115.120.7	 	108.287 ms
+     ffm-bb3-link.telia.net	62.115.120.1	 	119.768 ms
+6	hbg-bb4-link.telia.net	213.155.135.86	 	115.076 ms
+     hbg-bb1-link.telia.net	213.155.135.82	 	115.813 ms
+     hbg-bb4-link.telia.net	62.115.141.110	 	126.967 ms
+7	ldn-bb4-link.telia.net	62.115.122.161	 	116.926 ms
+     nyk-bb3-link.telia.net	213.155.135.5	 	109.611 ms
+     nyk-bb4-link.telia.net	80.91.251.100	 	110.269 ms
+8	hbg-bb1-link.telia.net	80.91.249.11	 	145.034 ms
+     chi-b21-link.telia.net	62.115.137.59	 	110.215 ms
+     nyk-bb4-link.telia.net	62.115.136.185	 	126.232 ms
+9	kbn-bb3-link.telia.net	213.155.130.101	 	125.870 ms	125.816 ms
+     chi-b21-link.telia.net	62.115.137.59	 	116.943 ms
+10	google-ic-326155-chi-b21.c.telia.net	213.248.66.127	 	115.447 ms
+11	chi-b21-link.telia.net	80.91.246.162	 	125.726 ms
+12	 	 	 	*	*	*
+13	 	 	 	*	*	*
+14	 	 	 	*	*	*
+15	 	 	 	*	*	*
+16	 	 	 	*	*	*
+No reply for 5 hops. Assuming we reached firewall.
+</ql-code-block>
+<ql-infobox><strong>Note: </strong>In the example output, the traffic destined for the Standard tier VM reached Google Cloud's network after the 12th hop. The IP address on hop 11 is listed in Chicago, USA, which has an <a href="https://peering.google.com/#/infrastructure" target="_blank">Edge Point of Presence (PoP)</a> and is close to Iowa, USA (us-central1). This demonstrates that Premium network tier traffic enters the Google Cloud network much closer to the user than Standard network tier traffic does.</ql-infobox>
+<ql-warningbox><strong>Note: </strong>Traffic on the public internet can use different routes. Therefore, you might get slightly different results than the examples shown above.</ql-warningbox>
+<h2 id="step5">Congratulations!</h2>
+<p>In this lab, you have created one VM in the Premium network service tier (default) and one VM in the Standard network service tier. Then, you used a third-party service to visualize the differences in latency and network paths for each VM instance. The Premium tier VM had a lower latency and its traffic entered Google Cloud's network sooner than the Standard tier VM's traffic.</p>
+<p>With network service tiers, Google Cloud offers the flexibility to configure your resources for performance or cost by introducing the Standard tier of networking. To learn more about the pricing differences between the two network tiers, refer to the <a href="https://cloud.google.com/network-tiers/pricing" target="_blank">pricing documentation</a>.</p>
+<h2 id="step6">End your lab</h2>
+<p>When you have completed your lab, click <strong>End Lab</strong>. Google Cloud Skills Boost removes the resources you’ve used and cleans the account for you.</p>
+<p>You will be given an opportunity to rate the lab experience. Select the applicable number of stars, type a comment, and then click <strong>Submit</strong>.</p>
+<p>The number of stars indicates the following:</p>
+<ul>
+<li>1 star = Very dissatisfied</li>
+<li>2 stars = Dissatisfied</li>
+<li>3 stars = Neutral</li>
+<li>4 stars = Satisfied</li>
+<li>5 stars = Very satisfied</li>
+</ul>
+<p>You can close the dialog box if you don't want to provide feedback.</p>
+<p>For feedback, suggestions, or corrections, please use the <strong>Support</strong> tab.</p>
+<p>Copyright 2022 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">Overview</a></li><li><a href="#step2">Setup and requirements</a></li><li><a href="#step3">Task 1. Create the VM instances</a></li><li><a href="#step4">Task 2. Explore the latency and network paths</a></li><li><a href="#step5">Congratulations!</a></li><li><a href="#step6">End your lab</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+<script data-glue-cookie-notification-bar-category='2B' src='https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.js'></script>
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab, you create one VM in the premium network service tier (default) and one VM in the standard network service tier. Then you compare the latency and routes for each VM instance.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+0m setup
+&middot;
+60m access
+&middot;
+60m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>introductory</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/1170">https://googlecoursera.qwiklabs.com/catalog_lab/1170</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="1170" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+

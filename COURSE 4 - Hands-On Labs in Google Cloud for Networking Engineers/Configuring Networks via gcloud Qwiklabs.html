@@ -1,0 +1,941 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Configuring Networks via gcloud | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-b1b28b59480cca2ab0c23485f64ba2ec8893bdc9.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-484f429ecd41bc910509948cecaf71d98c510234.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-644b7af44e10b6334d7881042d33e7eac427c3b8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-011e84c80a51010837f8d7868d0972aebf80b2b1.js"></script>
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="G6H84jgBsVTTeiLxCljvZ1ncVA3wqayYRU7JciPYIDAdniZNExw/daxiGWkgKAKgJhSc+ylMNZcSZAMd+8cYfg==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:0,&quot;variant&quot;:&quot;original&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;barker&quot;,&quot;community_forum&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;used_in&quot;,&quot;content_provider_admin&quot;,&quot;program_announcements&quot;,&quot;organization_announcements&quot;,&quot;organization_learning_plans&quot;,&quot;course_upgrade&quot;,&quot;show_annual_purchase_now&quot;,&quot;oauth_risc_shutoff&quot;,&quot;program_learning_assignment&quot;,&quot;teams&quot;,&quot;peer_assignment&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;canonical_domain_redirect&quot;,&quot;alexandria_show_bundle_errors&quot;,&quot;search_updates&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab you use the gcloud command line to create VPC networks, subnets, and VM instances, then test connectivity.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Configuring Networks via gcloud | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab you use the gcloud command line to create VPC networks, subnets, and VM instances, then test connectivity.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/32798871?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/32798871?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-2bce1f34bff374bb8e1de389ce3467c39fc4868b.css" media="all" />
+<link rel="stylesheet" href="https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.css" media="screen" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="df485dae09b0d754" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-title-medium'>Configuring Networks via gcloud</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/32798871?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/32798871?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/32798871?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/32798871?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/32798871?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/32798871?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/32798871?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/32798871?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/32798871?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/32798871?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/32798871?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/32798871?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/32798871?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/32798871?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/32798871?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/32798871?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/32798871?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/32798871?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/32798871?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-title-medium'>Justin Ho</h4>
+<p class='ql-body-medium text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-medium text--light'>
+</p>
+<a class="text--green ql-title-small" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-label-medium text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-label-medium text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-label-medium text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+—/100
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create a VPC with custom subnet mode.
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create a VPC with custom subnet mode.' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+</span>
+/ 10
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create custom subnet within the labnet VPC
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create custom subnet within the labnet VPC' step_no='2'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+</span>
+/ 10
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Add firewall rules to allow tcp:22 and icmp
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Add firewall rules to allow tcp:22 and icmp' step_no='3'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-3'>
+</span>
+/ 10
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create another VPC, subnet and required deny firewall rules.
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create another VPC, subnet and required deny firewall rules.' step_no='4'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-4'>
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create VM instances
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create VM instances' step_no='5'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-5'>
+</span>
+/ 40
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Configuring Networks via gcloud&quot;,&quot;lab_name&quot;:&quot;Configuring Networks via gcloud&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='32798871' data-lab-billing-limit='0.0' data-lab-duration='2700' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:false}' labDetails='[]' labTimer='{&quot;ticking&quot;:false,&quot;secondsRemaining&quot;:2700}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Configuring Networks via gcloud
+</h1>
+<div class='lab-preamble__details ql-title-medium'>
+<span>45 minutes</span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/32798871/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.6348'></div>
+
+</a></div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">GSP630</h2>
+<p><img alt="Google Cloud self-paced labs logo" src="https://cdn.qwiklabs.com/GMOHykaqmlTHiqEeQXTySaMXYPHeIvaqa2qHEzw6Occ%3D"></p>
+
+<h2 id="step2">Overview</h2>
+<p>A Virtual Private Cloud (VPC) network is a global resource which consists of a list of regional virtual subnetworks (subnets) in data centers, all connected by a global wide area network (WAN). VPC networks are logically isolated from each other in Google Cloud.</p>
+<p>VPC provides networking functionality to Compute Engine virtual machine (VM) instances, Kubernetes Engine containers, and App Engine Flex. Each Google Cloud project by default has a <code>default</code> network configuration which provides each region with an auto subnet network.</p>
+<p>In this lab you use <code>gcloud</code> to create two custom VPC networks with subnets, firewall rules, and VM instances, then test the networks' ability to allow traffic from the public internet.</p>
+<h2 id="step3">Setup and requirements</h2>
+<h3>Before you click the Start Lab button</h3>
+<p>Read these instructions. Labs are timed and you cannot pause them. The timer, which starts when you click <strong>Start Lab</strong>, shows how long Google Cloud resources will be made available to you.</p>
+<p>This hands-on lab lets you do the lab activities yourself in a real cloud environment, not in a simulation or demo environment. It does so by giving you new, temporary credentials that you use to sign in and access Google Cloud for the duration of the lab.</p>
+<p>To complete this lab, you need:</p>
+<ul>
+<li>Access to a standard internet browser (Chrome browser recommended).</li>
+</ul>
+<ql-warningbox>
+<strong>Note:</strong> Use an Incognito or private browser window to run this lab. This prevents any conflicts between your personal account and the Student account, which may cause extra charges incurred to your personal account.
+</ql-warningbox>
+<ul>
+<li>Time to complete the lab---remember, once you start, you cannot pause a lab.</li>
+</ul>
+<ql-warningbox>
+<strong>Note:</strong> If you already have your own personal Google Cloud account or project, do not use it for this lab to avoid extra charges to your account.
+</ql-warningbox>
+
+<h3>How to start your lab and sign in to the Google Cloud console</h3>
+<ol>
+<li>
+<p>Click the <strong>Start Lab</strong> button. If you need to pay for the lab, a pop-up opens for you to select your payment method.
+On the left is the <strong>Lab Details</strong> panel with the following:</p>
+<ul>
+<li>The <strong>Open Google Cloud console</strong> button</li>
+<li>Time remaining</li>
+<li>The temporary credentials that you must use for this lab</li>
+<li>Other information, if needed, to step through this lab</li>
+</ul>
+</li>
+<li>
+<p>Click <strong>Open Google Cloud console</strong> (or right-click and select <strong>Open Link in Incognito Window</strong> if you are running the Chrome browser).</p>
+<p>The lab spins up resources, and then opens another tab that shows the <strong>Sign in</strong> page.</p>
+<p><strong><em>Tip:</em></strong> Arrange the tabs in separate windows, side-by-side.</p>
+<ql-infobox>
+<strong>Note: </strong>If you see the <strong>Choose an account</strong> dialog, click <strong>Use Another Account</strong>.        
+ </ql-infobox>
+</li>
+<li>
+<p>If necessary, copy the <strong>Username</strong> below and paste it into the <strong>Sign in</strong> dialog.</p>
+<ql-code-block nowrap templated="">
+ {{{user_0.username | "Username"}}}
+ </ql-code-block>
+<p>You can also find the <strong>Username</strong> in the <strong>Lab Details</strong> panel.</p>
+</li>
+<li>
+<p>Click <strong>Next</strong>.</p>
+</li>
+<li>
+<p>Copy the <strong>Password</strong> below and paste it into the <strong>Welcome</strong> dialog.</p>
+<ql-code-block nowrap templated="">
+ {{{user_0.password | "Password"}}}
+ </ql-code-block>
+<p>You can also find the <strong>Password</strong> in the <strong>Lab Details</strong> panel.</p>
+</li>
+<li>
+<p>Click <strong>Next</strong>.</p>
+<ql-infobox>
+<strong>Important: </strong>You must use the credentials the lab provides you. Do not use your Google Cloud account credentials. 
+ </ql-infobox>
+<ql-warningbox>
+<strong>Note: </strong>Using your own Google Cloud account for this lab may incur extra charges.
+ </ql-warningbox>
+</li>
+<li>
+<p>Click through the subsequent pages:</p>
+<ul>
+<li>Accept the terms and conditions.</li>
+<li>Do not add recovery options or two-factor authentication (because this is a temporary account).</li>
+<li>Do not sign up for free trials.</li>
+</ul>
+</li>
+</ol>
+<p>After a few moments, the Google Cloud console opens in this tab.</p>
+<ql-infobox>
+<strong>Note:</strong> To view a menu with a list of Google Cloud products and services, click the <strong>Navigation menu</strong> at the top-left.
+<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/nUxFb6oRFr435O3t6V7WYJAjeDFcrFb16G9wHWp5BzU%3D">
+</ql-infobox>
+
+<h3>Activate Cloud Shell</h3>
+<p>Cloud Shell is a virtual machine that is loaded with development tools. It offers a persistent 5GB home directory and runs on the Google Cloud. Cloud Shell provides command-line access to your Google Cloud resources.</p>
+<ol>
+<li>Click <strong>Activate Cloud Shell</strong> <img alt="Activate Cloud Shell icon" src="https://cdn.qwiklabs.com/ep8HmqYGdD%2FkUncAAYpV47OYoHwC8%2Bg0WK%2F8sidHquE%3D"> at the top of the Google Cloud console.</li>
+</ol>
+<p>When you are connected, you are already authenticated, and the project is set to your <strong>Project_ID</strong>, <ql-variable key="project_0.project_id" placeholder="PROJECT_ID"></ql-variable>. The output contains a line that declares the <strong>Project_ID</strong> for this session:</p>
+<ql-code-block nowrap output="" templated="">
+Your Cloud Platform project in this session is set to {{{project_0.project_id | "PROJECT_ID"}}}
+</ql-code-block>
+<p><code>gcloud</code> is the command-line tool for Google Cloud. It comes pre-installed on Cloud Shell and supports tab-completion.</p>
+<ol start="2">
+<li>(Optional) You can list the active account name with this command:</li>
+</ol>
+<ql-code-block nowrap templated="">
+gcloud auth list
+</ql-code-block>
+<ol start="3">
+<li>Click <strong>Authorize</strong>.</li>
+</ol>
+<p><strong>Output:</strong></p>
+<ql-code-block nowrap output="" templated="">
+ACTIVE: *
+ACCOUNT: {{{user_0.username | "ACCOUNT"}}}
+
+To set the active account, run:
+    $ gcloud config set account `ACCOUNT`
+</ql-code-block>
+<ol start="4">
+<li>(Optional) You can list the project ID with this command:</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud config list project
+</ql-code-block>
+<p><strong>Output:</strong></p>
+<ql-code-block nowrap output="" templated="">
+[core]
+project = {{{project_0.project_id | "PROJECT_ID"}}}
+</ql-code-block>
+<ql-infobox>
+<strong>Note: </strong>For full documentation of <code>gcloud</code>, in Google Cloud, refer to <a href="https://cloud.google.com/sdk/gcloud" target="_blank">the gcloud CLI overview guide</a>.
+</ql-infobox>
+
+<p>Install <code>ping</code> to use later in this lab:</p>
+<ql-code-block language="plaintext">
+sudo apt install iputils-ping
+</ql-code-block>
+<h2 id="step4">Task 1. Create network</h2>
+<p>You can choose to create an <code>auto mode</code> or <code>custom mode</code> VPC network. Each new network that you create must have a unique name within the same project. You can create up to four additional networks in a project.</p>
+<ul>
+<li>In Cloud Shell, use the following <code>gcloud</code> command to create a custom mode network called <code>labnet</code>:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud compute networks create labnet --subnet-mode=custom
+</ql-code-block>
+<p>With this command you're doing the following:</p>
+<ul>
+<li>
+<code>gcloud</code> invokes the Cloud SDK <code>gcloud</code> command line tool</li>
+<li>
+<code>compute</code> is a one of the groups available in <code>gcloud</code>, part of a nested hierarchy of command groups</li>
+<li>
+<code>networks</code> is a subgroup of <code>compute</code> with it's own specialized commands</li>
+<li>
+<code>create</code> is the action to be executed on this group</li>
+<li>
+<code>labnet</code> is the name of the network you're creating</li>
+<li>
+<code>--subnet-mode=custom</code> you're passing the subnet mode flag and the type of subnet you're creating, "custom".</li>
+</ul>
+<p>Click <strong>Check my progress</strong> to verify the objective.</p>
+<ql-activity-tracking step="1">
+    Create a VPC with custom subnet mode
+</ql-activity-tracking>
+<h2 id="step5">Task 2. Create a subnetwork</h2>
+<p>When you create a subnetwork, its name must be unique in that project for that region, even across networks. The same name can appear twice in a project as long as each one is in a different region.</p>
+<p>Each subnet must have a primary range, which must be unique within the same region in a project.</p>
+<ul>
+<li>Now create sub-network <code>labnet-sub</code>:</li>
+</ul>
+<ql-code-block nowrap templated="">
+gcloud compute networks subnets create labnet-sub \
+   --network labnet \
+   --region "{{{project_0.default_region | REGION}}}" \
+   --range 10.0.0.0/28
+</ql-code-block>
+<p>Click <strong>Check my progress</strong> to verify the objective.</p>
+<ql-activity-tracking step="2">
+    Create custom subnet within the labnet VPC
+</ql-activity-tracking>
+<h2 id="step6">Task 3. Viewing networks</h2>
+<ol>
+<li>List the networks in your project:</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud compute networks list
+</ql-code-block>
+<p>Your output should look like this:</p>
+<ql-code-block output="">
+NAME: default
+SUBNET_MODE: AUTO
+BGP_ROUTING_MODE: REGIONAL
+IPV4_RANGE:
+GATEWAY_IPV4:
+
+NAME: labnet
+SUBNET_MODE: CUSTOM
+BGP_ROUTING_MODE: REGIONAL
+IPV4_RANGE:
+GATEWAY_IPV4:
+</ql-code-block>
+<ql-infobox><strong>Note: </strong>Now you can see the `default` network that was created for your project.</ql-infobox>
+<ol start="2">
+<li>Use <code>describe</code> to view network details, such as its peering connections and subnets. Replace <code>NETWORK_NAME</code> with the name of your network:</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud compute networks describe NETWORK_NAME
+</ql-code-block>
+<h2 id="step7">Task 4. List subnets</h2>
+<p>You can list all subnets in all networks in your project, or you can show only the subnets for a particular network or region.</p>
+<ul>
+<li>Use this command to list all subnets in all VPC networks, in all regions:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud compute networks subnets list
+</ql-code-block>
+<p>You'll see the subnet you created towards the bottom of the list. It's the only one in the <code>labnet</code> network.</p>
+<h2 id="step8">Task 5. Creating firewall rules</h2>
+<p>Auto networks include default rules, custom networks do not include any firewall rules. Firewall rules are defined at the network level, and only apply to the network where they are created.</p>
+<p>The name you choose for each firewall rule must be unique to the project. To allow access to VM instances, you must apply firewall rules.</p>
+<ul>
+<li>Create the <code>labnet-allow-internal</code> firewall rule:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud compute firewall-rules create labnet-allow-internal \
+	--network=labnet \
+	--action=ALLOW \
+	--rules=icmp,tcp:22 \
+	--source-ranges=0.0.0.0/0
+</ql-code-block>
+<p>With this command you are doing the following:</p>
+<ul>
+<li>
+<code>firewall-rules</code> is a subcategory of <code>compute</code>
+</li>
+<li>
+<code>create</code> is the action you are taking</li>
+<li>
+<code>labnet-allow-internal</code> is the name of the firewall rule</li>
+<li>
+<code>--network=labnet</code> puts the rule in the <code>labnet</code> network</li>
+<li>
+<code>--action=ALLOW</code> must be used with the <code>--rules</code> flag, and is either "ALLOW" or "DENY"</li>
+<li>
+<code>--rules=icmp,tcp:22</code> specifies the icmp and tcp protocols and the ports that the rule applies to</li>
+<li>
+<code>--source-ranges=0.0.0.0/0</code> specifies the ranges of source IP addresses in CIDR format.</li>
+</ul>
+<p>Click <strong>Check my progress</strong> to verify the objective.</p>
+<ql-activity-tracking step="3">
+    Add firewall rules to allow tcp:22 and ICMP
+</ql-activity-tracking>
+<h2 id="step9">Task 6. Viewing firewall rules details</h2>
+<ul>
+<li>Inspect the firewall rules to see its name, applicable network, and components, including whether the rule is enabled or disabled:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud compute firewall-rules describe [FIREWALL_RULE_NAME]
+</ql-code-block>
+<h2 id="step10">Task 7. Create another network</h2>
+<p>Now you'll create a another network, add firewall rules to it, then add VMs to both networks to test the ability to communicate with the networks.</p>
+<ol>
+<li>Run the following command to create the  <strong>privatenet</strong> network:</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud compute networks create privatenet --subnet-mode=custom
+</ql-code-block>
+<ol start="2">
+<li>Create the  <strong>private-sub</strong> subnet:</li>
+</ol>
+<ql-code-block nowrap templated="">
+
+gcloud compute networks subnets create private-sub \
+    --network=privatenet \
+    --region="{{{project_0.default_region | REGION}}}" \
+    --range 10.1.0.0/28
+
+</ql-code-block>
+<h3>Create the firewall rules for privatenet</h3>
+<ol>
+<li>Run the following command to create the <strong>privatenet-deny</strong> firewall rule:</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud compute firewall-rules create privatenet-deny \
+    --network=privatenet \
+    --action=DENY \
+    --rules=icmp,tcp:22 \
+    --source-ranges=0.0.0.0/0
+</ql-code-block>
+<p>This firewall rule denies all access from the internal protocol.</p>
+<p>The output should look like this:</p>
+<ql-code-block output="">
+
+Creating firewall...done.
+NAME: privatenet-deny
+NETWORK: privatenet
+DIRECTION: INGRESS
+PRIORITY: 1000
+ALLOW:
+DENY: icmp,tcp:22
+DISABLED: False
+
+</ql-code-block>
+<p>Click <strong>Check my progress</strong> to verify the objective.</p>
+<ql-activity-tracking step="4">
+    Create another VPC, subnet and required deny firewall rules
+</ql-activity-tracking>
+<ol start="2">
+<li>Run the following command to list all the firewall rules (sorted by VPC network):</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud compute firewall-rules list --sort-by=NETWORK
+</ql-code-block>
+<ol start="3">
+<li>Look for the networks you created to quickly find your firewall rules.</li>
+</ol>
+<h2 id="step11">Task 8. Create VM instances</h2>
+<p>Create two VM instances in the subnets:</p>
+<ul>
+<li>
+<strong>pnet-vm</strong> in <strong>private-sub</strong>
+</li>
+<li>
+<strong>lnet-vm</strong> in <strong>labnet-sub</strong>
+</li>
+</ul>
+<h3>Create the pnet-vm instance</h3>
+<ul>
+<li>Run the following command to create the <strong>pnet-vm</strong> instance in the <code>private-sub</code> subnet:</li>
+</ul>
+<ql-code-block nowrap templated="">
+
+gcloud compute instances create pnet-vm \
+--zone="{{{project_0.default_zone | ZONE}}}" \
+--machine-type=n1-standard-1 \
+--subnet=private-sub
+
+</ql-code-block>
+<p>The output should look like this:</p>
+<ql-code-block nowrap output="" templated="">
+
+NAME: pnet-vm
+ZONE:"{{{project_0.default_zone | ZONE}}}"
+MACHINE_TYPE: n1-standard-1
+PREEMPTIBLE:
+INTERNAL_IP: 10.1.0.2
+EXTERNAL_IP: 34.122.106.173
+STATUS: RUNNING
+
+</ql-code-block>
+<h3>Create the lnet-vm instance</h3>
+<ol>
+<li>Using the previous step as your guide, create a VM with the following values:</li>
+</ol>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+
+
+<tr>
+<td>Name</td>
+<td>lnet-vm</td>
+</tr>
+<tr>
+<td>Zone</td>
+<td><ql-variable key="project_0.default_zone" placeholder="ZONE"></ql-variable></td>
+</tr>
+<tr>
+<td>Machine type</td>
+<td>n1-standard-1</td>
+</tr>
+<tr>
+<td>Subnet</td>
+<td>labnet-sub</td>
+</tr>
+
+</table>
+<p>You should see a similar output when your subnet is created.</p>
+<ol start="2">
+<li>Now list all the VM instances (sorted by zone):</li>
+</ol>
+<ql-code-block nowrap templated="">
+gcloud compute instances list --sort-by=ZONE
+</ql-code-block>
+<p>For this command you're using the <code>instance</code> subgroup, with it's specialized command <code>list</code>.</p>
+<p>You should see the 2 VMs you just created:</p>
+<ql-code-block nowrap output="" templated="">
+
+NAME     ZONE           MACHINE_TYPE   ...  INTERNAL_IP  EXTERNAL_IP      STATUS
+lnet-vm  {{{project_0.default_zone | ZONE}}}  n1-standard-1               10.0.0.2     35.202.156.230   RUNNING
+pnet-vm  {{{project_0.default_zone | ZONE}}}  n1-standard-1               10.0.0.2     104.154.146.108  RUNNING
+
+</ql-code-block>
+<p>Click <strong>Check my progress</strong> to verify the objective.</p>
+<ql-activity-tracking step="5">
+    Create VM instances
+</ql-activity-tracking>
+<h2 id="step12">Task 9. Explore the connectivity</h2>
+<p>When you created the networks, you applied firewall rules to each - so one network allows INGRESS traffic, and the other denies INGRESS traffic.</p>
+<p>For this experiment, you should be able to communicate with the first network, but be unable to communicate with the second one.</p>
+<h3>Ping the external IP addresses</h3>
+<ol>
+<li>Ping the external IP addresses of the VM instances to determine if you can reach the instances from the public internet.</li>
+</ol>
+<ql-code-block language="plaintext">
+ping -c 3 &lt;Enter lnet-vm's external IP here&gt;
+</ql-code-block>
+<p>This should work - <code>lnet-vm</code>'s network has a firewall rule that allows traffic.</p>
+<ol start="2">
+<li>Repeat the command, but use <code>pnet-vm</code>'s external IP address.</li>
+</ol>
+<p>This should not work - nothing should be happening. <code>pnet-vm</code>'s network has a firewall rule that denies traffic. Use <strong>Ctrl</strong>+<strong>C</strong> to end the process.</p>
+<h2 id="step13">Congratulations!</h2>
+<p>In this lab you created two custom mode VPC networks, firewall rules, and VM instances using the Cloud Shell command line. Then you tested the ability of the VPC networks to receive traffic from the public internet.</p>
+<h3>Finish your quest</h3>
+<p>This self-paced lab is part of the <a href="https://google.qwiklabs.com/quests/95" target="_blank">Using the Cloud SDK Command Line</a> quest. A quest is a series of related labs that form a learning path. Completing this quest earns you a badge to recognize your achievement. You can make your badge or badges public and link to them in your online resume or social media account.  <a href="https://google.qwiklabs.com/quests/95/enroll" target="_blank">Enroll in this Quest</a> and get immediate completion credit.  See the <a href="http://cloudskillsboost.google/catalog" target="_blank">Google Cloud Skills Boost catalog</a> to see all available quests.</p>
+<h3>Take your next lab</h3>
+<p>Continue your Quest with <a href="https://google.qwiklabs.com/catalog_lab/2058" target="_blank">Configuring IAM Permissions with gcloud</a> or try one of these suggestions:</p>
+<ul>
+<li><a href="https://google.qwiklabs.com/catalog_lab/2047" target="_blank">Configuring Networks via gcloud</a></li>
+<li><a href="https://google.qwiklabs.com/catalog_lab/2048" target="_blank">Using gsutil to perform Operations on Buckets and Objects </a></li>
+</ul>
+<h3>Next steps / learn more</h3>
+<p>Learn more about VPC networking:</p>
+<ul>
+<li>
+<a href="https://cloud.google.com/vpc/docs/using-vpc" target="_blank">Using VPC Networks</a>.</li>
+<li>
+<a href="https://cloud.google.com/vpc/docs/using-vpc#subnet-rules" target="_blank">Read more on the rules for creating or editing a subnet</a>.</li>
+</ul>
+<h3>Google Cloud training and certification</h3>
+<p>...helps you make the most of Google Cloud technologies. <a href="https://cloud.google.com/training/courses" target="_blank">Our classes</a> include technical skills and best practices to help you get up to speed quickly and continue your learning journey. We offer fundamental to advanced level training, with on-demand, live, and virtual options to suit your busy schedule. <a href="https://cloud.google.com/certification/" target="_blank">Certifications</a> help you validate and prove your skill and expertise in Google Cloud technologies.</p>
+
+<p><strong>Manual Last Updated October 09, 2023</strong></p>
+<p><strong>Lab Last Tested October 09, 2023</strong></p>
+<p>Copyright 2023 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+
+
+
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">GSP630</a></li><li><a href="#step2">Overview</a></li><li><a href="#step3">Setup and requirements</a></li><li><a href="#step4">Task 1. Create network</a></li><li><a href="#step5">Task 2. Create a subnetwork</a></li><li><a href="#step6">Task 3. Viewing networks</a></li><li><a href="#step7">Task 4. List subnets</a></li><li><a href="#step8">Task 5. Creating firewall rules</a></li><li><a href="#step9">Task 6. Viewing firewall rules details</a></li><li><a href="#step10">Task 7. Create another network</a></li><li><a href="#step11">Task 8. Create VM instances</a></li><li><a href="#step12">Task 9. Explore the connectivity</a></li><li><a href="#step13">Congratulations!</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+<script data-glue-cookie-notification-bar-category='2B' src='https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.js'></script>
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab you use the gcloud command line to create VPC networks, subnets, and VM instances, then test connectivity.
+</p>
+<p>
+This lab is included in these quests:
+<a href="/quests/95">Using the Cloud SDK Command Line</a>, <a href="/quests/92">Using the Cloud SDK Command Line</a>.
+If you complete this lab you&#39;ll receive credit for it when you enroll in one of these quests.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+0m setup
+&middot;
+45m access
+&middot;
+45m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>introductory</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/2047">https://googlecoursera.qwiklabs.com/catalog_lab/2047</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="2047" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+
